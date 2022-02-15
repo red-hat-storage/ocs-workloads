@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: io-writer-mysql
+  labels:
+    io: io-writer-mysql
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      io: io-writer-mysql
+  template:
+    metadata:
+      labels:
+        io: io-writer-mysql
+    spec:
+      containers:
+      - name: fedora
+        image: quay.io/prsurve/mysql_data_write:latest
+        command: ['/usr/bin/python3', '/script/db.py']
+        imagePullPolicy: Always
+        env:
+         - name: MYSQL_DB_HOST
+           value: mysql
+         - name: MYSQL_DB_USER
+           value: root
+         - name: MYSQL_DB_PASSWORD
+           value: password
