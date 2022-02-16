@@ -13,3 +13,5 @@ Repo will contain workload files to setup
     The current version is 1.7.1, this version is the supported one for k8s 1.22
     
     to deploy on k8s before 1.16 the *-legacy.yaml files need to be used.
+- [RDR](/rdr/)
+
