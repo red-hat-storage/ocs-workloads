@@ -4,3 +4,4 @@ resources:
 - mysql_pvc.yaml
 - mysql_service.yaml
 - io_writer_mysql.yaml
+- mysql_secret.yaml
