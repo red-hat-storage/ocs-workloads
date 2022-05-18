@@ -2,7 +2,7 @@ apiVersion: app.k8s.io/v1beta1
 kind: Application
 metadata:
   name: busybox
-  namespace: busybox-workloads-2
+  namespace: busybox-workloads
 spec:
   componentKinds:
   - group: apps.open-cluster-management.io
