@@ -4,3 +4,4 @@ resources:
 - placementrule.yaml
 - subscription.yaml
 - drpc.yaml
+- app.yaml
