@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    appname: busybox-81
+  name: busybox-81
+spec:
+  selector:
+    matchLabels:
+      workload: busybox-81
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload: busybox-81
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        - while true; do echo $(date) | tee -a /mnt/test/outfile; sync; sleep 6; done
+        image: quay.io/vcppds7878/busybox:latest
+        imagePullPolicy: IfNotPresent
+        name: busybox
+        volumeMounts:
+        - mountPath: /mnt/test
+          name: mypvc
+      volumes:
+      - name: mypvc
+        persistentVolumeClaim:
+          claimName: busybox-pvc-81
+          readOnly: false
