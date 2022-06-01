@@ -1,0 +1,4 @@
+namespace: ramen-busybox-1
+resources:
+- channel.yaml
+- namespace.yaml
