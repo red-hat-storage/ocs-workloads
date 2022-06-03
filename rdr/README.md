@@ -10,7 +10,8 @@
 
 ### For Running the RDR workload
 
+- **busybox**
 - #### git clone the fork repo
-- #### now run this cmd **`oc create -k rdr/subscriptions/ ; oc create -k rdr/subscriptions/busybox`** from hub cluster
+- #### now run this cmd **`oc create -k rdr/$workload/app-$workload-1/subscriptions/ ; oc create -k rdr/$workload/app-$workload-1/subscriptions/busybox`** from hub cluster
 
  
