@@ -8,7 +8,7 @@ metadata:
 spec:
   preferredCluster: "amagrawa-c1"
   drPolicyRef:
-    name: odr-policy-3m
+    name: odr-policy-20m
   placementRef:
     kind: PlacementRule
     name: busybox-placement
