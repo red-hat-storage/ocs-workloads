@@ -16,11 +16,16 @@ spec:
         workload: busybox-1
     spec:
       containers:
-      - command:
-        - sh
-        - -c
-        - while true; do echo $(date) | tee -a /mnt/test/outfile; sync; sleep 15;
-          done
+      - command: ["/bin/sh", "-c"]
+        args:
+          - while true; 
+            file=/mnt/test/data_`data +%s`;
+            do dd if=/dev/urandom of=$file bs=$(($RANDOM)) count=$(($RANDOM%3+1));
+            md5sum $file >>hashfile;
+            sync;
+            sleep 15;
+            if [ $(($RANDOM%2)) == 1 ]; then md5sum --check hashfile; fi;
+            done
         image: quay.io/vcppds7878/busybox:latest
         imagePullPolicy: IfNotPresent
         name: busybox
