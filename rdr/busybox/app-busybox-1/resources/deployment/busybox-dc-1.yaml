@@ -19,7 +19,7 @@ spec:
       - command: ["/bin/sh", "-c"]
         args:
           - while true; 
-            file=/mnt/test/data_`data +%s`;
+            file=/mnt/test/data_`date +%s`;
             do dd if=/dev/urandom of=$file bs=$(($RANDOM)) count=$(($RANDOM%3+1));
             md5sum $file >>hashfile;
             sync;
