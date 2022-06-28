@@ -5,7 +5,7 @@ while true
         dd if=/dev/urandom of=$file bs=$(($RANDOM)) count=$(($RANDOM%3+1))
         md5sum $file >>$hashfile
         sync
-        sleep 15
+        sleep $(($RANDOM%15+1))
         if [ $(($RANDOM%2)) == 1 ]
         then
             md5sum -c $hashfile
