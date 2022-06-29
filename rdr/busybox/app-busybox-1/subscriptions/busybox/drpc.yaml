@@ -6,11 +6,9 @@ metadata:
   labels:
     app: busybox-sample
 spec:
-  #preferredCluster: "PLACEHOLDER-C1-ClusterName"
-  preferredCluster: "sagrawal-c1"
+  preferredCluster: "PLACEHOLDER-C1-ClusterName"
   drPolicyRef:
-    #name: PLACEHOLDER-DRPOLICY-NAME
-    name: odr-policy-5m 
+    name: PLACEHOLDER-DRPOLICY-NAME
   placementRef:
     kind: PlacementRule
     name: busybox-placement
