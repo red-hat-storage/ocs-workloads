@@ -16,10 +16,11 @@ spec:
         workload: busybox-3
     spec:
       containers:
-      - command:
-        - sh
-        - -c
-        - while true; do echo $(date) | tee -a /mnt/test/outfile; sync; sleep 8; done
+      - command: ["/bin/sh", "-c"]
+        args:
+          - wget  https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/io-pattern-busybox/rdr/busybox/scripts/simple_io.sh -O /mnt/test/simple_io.sh;
+            chmod +x /mnt/test/simple_io.sh;
+            /mnt/test/simple_io.sh
         image: quay.io/vcppds7878/busybox:latest
         imagePullPolicy: IfNotPresent
         name: busybox
