@@ -8,6 +8,6 @@ while true
         sleep $(($RANDOM%15+1))
         if [ $(($RANDOM%2)) == 1 ]
         then
-            md5sum -c $hashfile
+            md5sum -c --quiet $hashfile
         fi
     done
