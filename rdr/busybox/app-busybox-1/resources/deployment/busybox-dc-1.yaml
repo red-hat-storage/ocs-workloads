@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     appname: busybox-1
+    workloadpattern: simple_io
   name: busybox-1
 spec:
   selector:
@@ -19,9 +20,15 @@ spec:
       - command: ["/bin/sh", "-c"]
         args:
           - wget  https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/io-pattern-busybox/rdr/busybox/scripts/simple_io.sh -O /mnt/test/simple_io.sh;
-            chmod +x /mnt/test/simple_io.sh;
+            wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/io-pattern-busybox/rdr/busybox/scripts/simple_io_integrity_check.sh -O /mnt;
+            chmod +x /mnt/test/simple_io.sh; chmod +x /mnt/test/simple_io_integrity_check.sh;
             /mnt/test/simple_io.sh
         image: quay.io/vcppds7878/busybox:latest
+        env:
+        - name: IO_SCRIPT
+          value: "/mnt/test/simple_io.sh"
+        - name: DATA_INTEGRITY_SCRIPT
+          value: "/mnt/test/simple_io_integrity_check.sh"
         imagePullPolicy: IfNotPresent
         name: busybox
         volumeMounts:
