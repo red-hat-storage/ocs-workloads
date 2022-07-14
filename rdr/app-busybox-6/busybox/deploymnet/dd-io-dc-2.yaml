@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    appname: dd-io-2
+  name: dd-io-2
+spec:
+  selector:
+    matchLabels:
+      workload: dd-io-2
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload: dd-io-2
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        - /run-io.sh
+        image: quay.io/prsurve/busybox:main
+        imagePullPolicy: Always
+        name: busybox
+        volumeMounts:
+        - mountPath: /mnt/test
+          name: mypvc
+      volumes:
+      - name: mypvc
+        persistentVolumeClaim:
+          claimName: dd-io-pvc-2
+          readOnly: false

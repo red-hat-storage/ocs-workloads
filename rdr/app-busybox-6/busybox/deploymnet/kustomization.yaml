@@ -1,0 +1,15 @@
+resources:
+- dd-io-dc-1.yaml
+- dd-io-pvc-1.yaml
+- dd-io-dc-2.yaml
+- dd-io-pvc-2.yaml
+- dd-io-dc-3.yaml
+- dd-io-pvc-3.yaml
+- dd-io-dc-4.yaml
+- dd-io-pvc-4.yaml
+- dd-io-dc-5.yaml
+- dd-io-pvc-5.yaml
+- dd-io-dc-6.yaml
+- dd-io-pvc-6.yaml
+- dd-io-dc-7.yaml
+- dd-io-pvc-7.yaml
