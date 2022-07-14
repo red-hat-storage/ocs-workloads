@@ -6,4 +6,3 @@ RUN ./autogen.sh ; ./configure ; make ; make install
 WORKDIR /
 RUN apk del git automake autoconf build-base --no-cache 
 RUN rm -rf arequal
-RUN chmod 755 /run-io.sh
