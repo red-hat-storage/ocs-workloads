@@ -5,4 +5,4 @@ metadata:
   name: ramen-gitops
 spec:
   type: GitHub
-  pathname: https://github.com/PLACEHOLDER/ocs-workloads.git
+  pathname: https://github.com/keemano/ocs-workloads.git
