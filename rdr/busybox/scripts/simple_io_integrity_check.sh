@@ -1,5 +1,3 @@
-#!/bin/bash
-
 HASHFILE=/mnt/test/hashfile
 
 if [ -f "$HASHFILE" ]; then

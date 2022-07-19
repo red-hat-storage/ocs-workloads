@@ -6,9 +6,9 @@ metadata:
   labels:
     app: busybox-sample
 spec:
-  preferredCluster: "prsurve-vm-d"
+  preferredCluster: "sagrawal-c2j"
   drPolicyRef:
-    name: odr-policy-east-west-rpo-5m
+    name: odr-policy-5m
   placementRef:
     kind: PlacementRule
     name: busybox-placement

@@ -2,4 +2,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: busybox-workloads-12
+  name: busybox-workloads-123
