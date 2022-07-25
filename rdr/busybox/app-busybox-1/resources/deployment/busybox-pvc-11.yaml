@@ -10,4 +10,4 @@ spec:
   resources:
     requests:
       storage: 33Gi
-  storageClassName: ocs-storagecluster-ceph-rbd-mirror
+  storageClassName: ocs-storagecluster-ceph-rbd
