@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     appname: busybox-31
+    workloadpattern: kernel_untar
   name: busybox-31
 spec:
   selector:

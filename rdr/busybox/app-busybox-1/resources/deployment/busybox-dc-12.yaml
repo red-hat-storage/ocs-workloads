@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     appname: busybox-12
+    workloadpattern: simple_io
   name: busybox-12
 spec:
   selector:
