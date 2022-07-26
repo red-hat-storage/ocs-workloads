@@ -6,9 +6,9 @@ metadata:
   labels:
     app: busybox-sample
 spec:
-  preferredCluster: "sagrawal-c2j"
+  preferredCluster: "vmware-dccp-one"
   drPolicyRef:
-    name: odr-policy-5m
+    name: odr-policy-east-west-rpo-5m
   placementRef:
     kind: PlacementRule
     name: busybox-placement

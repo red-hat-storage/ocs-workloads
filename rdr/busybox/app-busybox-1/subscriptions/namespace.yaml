@@ -2,4 +2,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ramen-busybox-11
+  name: ramen-busybox-123
