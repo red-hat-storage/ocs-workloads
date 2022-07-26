@@ -7,7 +7,7 @@ metadata:
     app: busybox-sample
 spec:
   #preferredCluster: "PLACEHOLDER-C1-ClusterName"
-  preferredCluster: "vmware-dccp-one"
+  preferredCluster: "prsurve-vm-d"
   drPolicyRef:
     #name: PLACEHOLDER-DRPOLICY-NAME
     name: odr-policy-east-west-rpo-5m
