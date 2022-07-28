@@ -3,13 +3,13 @@ apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
   annotations:
-    apps.open-cluster-management.io/github-branch: kernel-untar-busybox 
+    apps.open-cluster-management.io/github-branch: kernel-untar-busybox
     apps.open-cluster-management.io/github-path: rdr/busybox/app-busybox-1/resources
   labels:
     app: busybox-sample
   name: busybox-sub
 spec:
-    channel: ramen-busybox-123/ramen-gitops
+    channel: ramen-busybox-1/ramen-gitops
     placement:
       placementRef:
         kind: PlacementRule

@@ -1,4 +1,4 @@
-namespace: busybox-workloads-2a
+namespace: busybox-workloads-2
 resources:
 - namespace.yaml
 - placementrule.yaml
