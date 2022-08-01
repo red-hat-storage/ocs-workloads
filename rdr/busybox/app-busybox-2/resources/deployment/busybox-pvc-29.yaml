@@ -9,5 +9,5 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 123Gi
+      storage: 58Gi
   storageClassName: ocs-storagecluster-ceph-rbd
