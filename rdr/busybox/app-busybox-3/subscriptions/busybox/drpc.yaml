@@ -6,9 +6,9 @@ metadata:
   labels:
     app: busybox-sample
 spec:
-  preferredCluster: "PLACEHOLDER-C1-ClusterName"
+  preferredCluster: "kmanohar-clu1"
   drPolicyRef:
-    name: PLACEHOLDER-DRPOLICY-NAME
+    name: dr-policy-5m
   placementRef:
     kind: PlacementRule
     name: busybox-placement
