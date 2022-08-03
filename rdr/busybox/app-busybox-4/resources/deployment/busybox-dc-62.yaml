@@ -16,12 +16,18 @@ spec:
         workload: busybox-62
     spec:
       containers:
-      - command:
-        - sh
-        - -c
-        - while true; do echo $(date) | tee -a /mnt/test/outfile; sync; sleep 15;
-          done
-        image: quay.io/vcppds7878/busybox:latest
+      - command: ["/bin/sh", "-c"]
+        args:
+          - wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/kernel_untar.sh -O /mnt/test/kernel_untar.sh;
+            wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/kernel_untar_integrity_check.sh -O /mnt/test/kernel_untar_integrity_check.sh;
+            chmod +x /mnt/test/kernel_untar.sh; chmod +x /mnt/test/kernel_untar_integrity_check.sh;
+            /mnt/test/kernel_untar.sh
+        image: quay.io/ocsci/rdr-ocs-workload
+        env:
+        - name: IO_SCRIPT
+          value: "/mnt/test/kernel_untar.sh"
+        - name: DATA_INTEGRITY_SCRIPT
+          value: "/mnt/test/kernel_untar_integrity_check.sh"
         imagePullPolicy: IfNotPresent
         name: busybox
         volumeMounts:
