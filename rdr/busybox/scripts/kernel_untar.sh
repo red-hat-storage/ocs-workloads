@@ -69,6 +69,21 @@ set_running_state()
     sync -f $MOUNT
 }
 
+# Run kernal untar
+untar_kernal_file()
+{
+    # Sleeping for some random interval of time to reduce stress
+    echo "Sleeping for $tm"
+    sleep $tm
+    tar xfz $MASTER_COPY
+    if [ $? -ne 0 ];
+    then
+        echo "Failed to untar kernel"
+        exit 1
+    fi
+    
+}
+
 if [ -f "$MOUNT""/""$MASTER_COPY" ]; then
     echo "Master copy tar already exists"
 else
@@ -104,6 +119,7 @@ if [ -f "$MOUNT""/""$MASTER_COPY" ]; then
 fi
 
 # From here keep a loop of untaring and renaming the kernel dirs
+sleep_time=$(shuf -i 180-500 -n1)
 while true
 do
     sync -f $MOUNT
@@ -118,11 +134,8 @@ do
     # We are out of pause state
     # create a file for IO running
     set_running_state
-    tar xfz $MASTER_COPY
-    if [ $? -ne 0 ];
-    then
-        echo "Failed to untar kernel"
-        exit 1
-    fi
+    # run io
+    untar_kernal_file
     mv $MOUNT/$KERNEL_DIRECTORY $MOUNT/$KERNEL_DIRECTORY"_`date +%s`"
+
 done
