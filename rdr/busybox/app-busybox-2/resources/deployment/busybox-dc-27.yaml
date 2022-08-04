@@ -16,6 +16,7 @@ spec:
       labels:
         workload: busybox-27
     spec:
+      containers:
       - command: ["/bin/sh", "-c"]
         args:
           - wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/kernel_untar.sh -O /mnt/test/kernel_untar.sh;

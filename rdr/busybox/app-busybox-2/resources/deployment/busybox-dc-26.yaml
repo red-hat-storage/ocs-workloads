@@ -16,6 +16,7 @@ spec:
       labels:
         workload: busybox-26
     spec:
+      containers:
       - command: ["/bin/sh", "-c"]
         args:
           - wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/kernel_untar.sh -O /mnt/test/kernel_untar.sh;
@@ -28,7 +29,6 @@ spec:
           value: "/mnt/test/kernel_untar.sh"
         - name: DATA_INTEGRITY_SCRIPT
           value: "/mnt/test/kernel_untar_integrity_check.sh"
-
         imagePullPolicy: IfNotPresent
         name: busybox
         volumeMounts:
