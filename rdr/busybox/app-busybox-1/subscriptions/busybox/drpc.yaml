@@ -8,7 +8,7 @@ metadata:
 spec:
   preferredCluster: "kmanohar-clu1"
   drPolicyRef:
-    name: dr-policy-5m
+    name: dr-policy-15m
   placementRef:
     kind: PlacementRule
     name: busybox-placement
