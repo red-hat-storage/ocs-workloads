@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
-    appname: busybox
+    appname: busybox_app3
   name: busybox-pvc-54
 spec:
   accessModes:
