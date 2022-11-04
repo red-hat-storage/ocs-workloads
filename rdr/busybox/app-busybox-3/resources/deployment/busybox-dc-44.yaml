@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    appname: busybox-44
+    appname: busybox_app3-44
   name: busybox-44
 spec:
   selector:

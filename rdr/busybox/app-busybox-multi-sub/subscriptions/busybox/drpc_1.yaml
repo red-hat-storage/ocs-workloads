@@ -14,4 +14,4 @@ spec:
     name: multi-sub-busybox-placement-1
   pvcSelector:
     matchLabels:
-      appname: busybox
+      appname: busybox_app1
