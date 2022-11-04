@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    appname: busybox-7
+    appname: busybox_app1-7
     workloadpattern: simple_io
   name: busybox-7
 spec:
