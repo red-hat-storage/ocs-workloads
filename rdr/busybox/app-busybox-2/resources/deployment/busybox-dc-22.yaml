@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    appname: busybox-22
+    appname: busybox_app2-22
     workloadpattern: kernel_untar
   name: busybox-22
 spec:
