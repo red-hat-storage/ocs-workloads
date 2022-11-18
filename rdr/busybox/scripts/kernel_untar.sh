@@ -69,6 +69,21 @@ set_running_state()
     sync -f $MOUNT
 }
 
+# Run kernal untar
+untar_kernal_file()
+{
+    # Sleeping for some random interval of time to reduce stress
+    echo "Sleeping for $sleep_time"
+    sleep $sleep_time
+    tar xfz $MASTER_COPY
+    if [ $? -ne 0 ];
+    then
+        echo "Failed to untar kernel"
+        exit 1
+    fi
+    
+}
+
 if [ -f "$MOUNT""/""$MASTER_COPY" ]; then
     echo "Master copy tar already exists"
 else
@@ -99,11 +114,13 @@ if [ -f "$MOUNT""/""$MASTER_COPY" ]; then
             exit 1
         fi
         arequal-checksum $MOUNT/$KERNEL_DIRECTORY>$MASTER_CHECKSUM_FILE
+	echo "Performing mv operation for saving original kernal Directory"
         mv $MOUNT/$KERNEL_DIRECTORY $MOUNT/$KERNEL_DIRECTORY"_original"
     fi
 fi
 
 # From here keep a loop of untaring and renaming the kernel dirs
+sleep_time=$(shuf -i 180-500 -n1)
 while true
 do
     sync -f $MOUNT
@@ -111,6 +128,7 @@ do
     # There could be half untared linx dir
     # may be due to failover , so we need to cleanup
     if [ -d $KERNEL_DIRECTORY ]; then
+    	echo "Performing rm opeation of $KERNEL_DIRECTORY"
         rm -rf $KERNEL_DIRECTORY
     fi
     cd $MOUNT
@@ -118,11 +136,9 @@ do
     # We are out of pause state
     # create a file for IO running
     set_running_state
-    tar xfz $MASTER_COPY
-    if [ $? -ne 0 ];
-    then
-        echo "Failed to untar kernel"
-        exit 1
-    fi
+    # run io
+    untar_kernal_file
+    echo "Performing mv operation of kernal directory to new directiry location"
     mv $MOUNT/$KERNEL_DIRECTORY $MOUNT/$KERNEL_DIRECTORY"_`date +%s`"
+
 done
