@@ -128,7 +128,7 @@ do
     # There could be half untared linx dir
     # may be due to failover , so we need to cleanup
     if [ -d $KERNEL_DIRECTORY ]; then
-    	echo "Performing rm opeation"
+    	echo "Performing rm opeation of $KERNEL_DIRECTORY"
         rm -rf $KERNEL_DIRECTORY
     fi
     cd $MOUNT
@@ -138,7 +138,7 @@ do
     set_running_state
     # run io
     untar_kernal_file
-    echo "Performing mv operation to new directiry location"
+    echo "Performing mv operation of kernal directory to new directiry location"
     mv $MOUNT/$KERNEL_DIRECTORY $MOUNT/$KERNEL_DIRECTORY"_`date +%s`"
 
 done
