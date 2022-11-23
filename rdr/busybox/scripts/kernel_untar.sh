@@ -124,6 +124,8 @@ sleep_time=$(shuf -i 180-500 -n1)
 while true
 do
     sync -f $MOUNT
+    echo "Sleeping for $sleep_time"
+    sleep $sleep_time
     block_if_no_space_left
     # There could be half untared linx dir
     # may be due to failover , so we need to cleanup
