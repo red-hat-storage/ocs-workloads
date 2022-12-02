@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  labels:
+    appname: mysql 
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ocs-storagecluster-cephfs
+  resources:
+    requests:
+      storage: 25G

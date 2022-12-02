@@ -1,0 +1,4 @@
+namespace: ramen-busybox-rbd-5
+resources:
+- channel.yaml
+- namespace.yaml

@@ -1,0 +1,4 @@
+namespace: ramen-mysql-rbd-5
+resources:
+- channel.yaml
+- namespace.yaml

@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: busybox-workloads-rbd-2
+  labels:
+    rdrworkload: "true"

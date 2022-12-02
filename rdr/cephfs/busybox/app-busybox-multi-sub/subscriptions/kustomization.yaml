@@ -1,0 +1,4 @@
+namespace: ramen-busybox-multisnap-cephfs-1
+resources:
+- channel.yaml
+- namespace.yaml

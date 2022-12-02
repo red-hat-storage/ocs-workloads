@@ -1,0 +1,4 @@
+namespace: ramen-mysql-cephfs-5
+resources:
+- channel.yaml
+- namespace.yaml

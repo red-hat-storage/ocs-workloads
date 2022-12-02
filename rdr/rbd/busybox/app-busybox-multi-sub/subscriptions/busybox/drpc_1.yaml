@@ -1,0 +1,17 @@
+---
+apiVersion: ramendr.openshift.io/v1alpha1
+kind: DRPlacementControl
+metadata:
+  name: multi-busybox-drpc-1
+  labels:
+    app: multi-busybox-sample
+spec:
+  preferredCluster: "PLACEHOLDER-C1-ClusterName"
+  drPolicyRef:
+    name: PLACEHOLDER-DRPOLICY-NAME
+  placementRef:
+    kind: PlacementRule
+    name: multi-sub-busybox-placement-1
+  pvcSelector:
+    matchLabels:
+      appname: busybox_app1

@@ -1,0 +1,7 @@
+namespace: busybox-workloads-rbd-2
+resources:
+- namespace.yaml
+- placementrule.yaml
+- subscription.yaml
+- drpc.yaml
+- app.yaml
