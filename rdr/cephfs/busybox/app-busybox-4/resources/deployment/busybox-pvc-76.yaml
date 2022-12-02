@@ -6,7 +6,7 @@ metadata:
   name: busybox-pvc-76
 spec:
   accessModes:
-  - ReadWriteOnce
+  - ReadWriteMany
   resources:
     requests:
       storage: 107Gi

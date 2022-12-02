@@ -7,7 +7,7 @@ metadata:
     appname: mysql 
 spec:
   accessModes:
-  - ReadWriteOnce
+  - ReadWriteMany
   storageClassName: ocs-storagecluster-cephfs
   resources:
     requests:
