@@ -20,7 +20,7 @@ spec:
         - sh
         - -c
         - while true; do echo $(date) | tee -a /mnt/test/outfile; sync; sleep 0; done
-        image: quay.io/vcppds7878/busybox:latest
+        image: quay.io/ocsci/busybox:latest
         imagePullPolicy: IfNotPresent
         name: busybox
         volumeMounts:
