@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: helloworld-pv-claim
+  labels:
+    appname: helloworld-app
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ocs-external-storagecluster-cephfs
+  resources:
+    requests:
+      storage: 10Gi

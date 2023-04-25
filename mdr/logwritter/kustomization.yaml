@@ -1,0 +1,4 @@
+---
+resources:
+- logwriter_cephfs.yaml
+- logwriter_rbd.yaml

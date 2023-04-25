@@ -1,0 +1,4 @@
+---
+resources:
+- cronjob_cephfs.yaml
+- cronjob_rbd.yaml

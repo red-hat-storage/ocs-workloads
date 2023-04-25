@@ -1,0 +1,43 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: job-rbdpvc
+  labels:
+    appname: job-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: ocs-external-storagecluster-ceph-rbd
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: countdown-rbd
+spec:
+  completions: 12
+  parallelism: 3
+  ttlSecondsAfterFinished: 100
+  template:
+    metadata:
+      name: countdown-rbd
+    spec:
+      containers:
+      - name: counter
+        image: centos:7
+        command:
+         - "bin/bash"
+         - "-c"
+         - "for i in {1..10000} ; do date; echo Hello from the Kubernetes cluster; sleep 10; done"
+      restartPolicy: Never
+      volumeMounts:
+      - mountPath: /mnt/target
+        name: mypvc
+  volumes:
+    - name: mypvc
+      persistentVolumeClaim:
+      claimName: job-rbdpvc
+      readOnly: false
