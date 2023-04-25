@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: logwriter-rbd
+  labels:
+    app: logwriter
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: logwriter
+  template:
+    metadata:
+      labels:
+        app: logwriter
+    spec:
+      topologySpreadConstraints:
+        - labelSelector:
+             matchLabels:
+               app: logwriter
+          maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      containers:
+      - name: logwriter
+        image: quay.io/mbukatov/logwriter:latest
+        command: ['/opt/logwriter.py', '--fsync', '-d', '-p', '10', '.']
+        workingDir: /mnt/target
+        volumeMounts:
+        - mountPath: /mnt/target
+          name: logwriter-rbd
+  volumeClaimTemplates:
+  - metadata:
+      name: logwriter-rbd
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      storageClassName: ocs-external-storagecluster-ceph-rbd

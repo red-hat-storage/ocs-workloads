@@ -1,0 +1,4 @@
+---
+resources:
+- job_cephfs.yaml
+- job_rbd.yaml

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    appname: busybox
+  name: busybox-pvc-82
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 149Gi
+  storageClassName: ocs-external-storagecluster-ceph-rbd

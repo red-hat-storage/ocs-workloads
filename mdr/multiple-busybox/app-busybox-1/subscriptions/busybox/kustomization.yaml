@@ -1,0 +1,7 @@
+namespace: busybox-workloads-1
+resources:
+- namespace.yaml
+- placementrule.yaml
+- subscription.yaml
+- drpc.yaml
+- app.yaml
