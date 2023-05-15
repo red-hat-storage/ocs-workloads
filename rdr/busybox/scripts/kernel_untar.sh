@@ -75,7 +75,7 @@ untar_kernal_file()
     # Sleeping for some random interval of time to reduce stress
     echo "Sleeping for $sleep_time"
     sleep $sleep_time
-    tar xfz $MASTER_COPY | pv -L 1k
+    tar xvfz $MASTER_COPY | pv -L 1k --timer
     if [ $? -ne 0 ];
     then
         echo "Failed to untar kernel"
