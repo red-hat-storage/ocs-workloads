@@ -15,6 +15,7 @@ spec:
     metadata:
       labels:
         workload: busybox-15
+        workloadpattern: simple_io
     spec:
       containers:
       - command: ["/bin/sh", "-c"]
