@@ -14,4 +14,5 @@ Repo will contain workload files to setup
     
     to deploy on k8s before 1.16 the *-legacy.yaml files need to be used.
 - [RDR](/rdr/)
+- [MDR](/mdr/)
 
