@@ -1,0 +1,4 @@
+namespace: ramen-samples
+resources:
+- channel.yaml
+- namespace.yaml
