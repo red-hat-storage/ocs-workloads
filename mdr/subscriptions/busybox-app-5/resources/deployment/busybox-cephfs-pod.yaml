@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    appname: busybox_app5-5
+  name: busybox-cephfs-pod-5
+spec:
+  selector:
+    matchLabels:
+      workload: busybox-cephfs
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload: busybox-cephfs
+    spec:
+      containers:
+      - command: ["/bin/sh", "-c"]
+        args:
+          - wget  https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/simple_io.sh -O /mnt/test/simple_io.sh;
+            wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/simple_io_integrity_check.sh  -O /mnt/test/simple_io_integrity_check.sh;
+            chmod +x /mnt/test/simple_io.sh; chmod +x /mnt/test/simple_io_integrity_check.sh;
+            /mnt/test/simple_io.sh
+        image: quay.io/ocsci/rdr-ocs-workload
+        imagePullPolicy: IfNotPresent
+        name: busybox
+        volumeMounts:
+        - mountPath: /mnt/test
+          name: mypvc
+      volumes:
+      - name: mypvc
+        persistentVolumeClaim:
+          claimName: busybox-cephfs-pvc-5
+          readOnly: false
