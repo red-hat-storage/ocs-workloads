@@ -1,5 +1,6 @@
 while true
-    file=/mnt/test/data_`date +%s`
+    hostname=$(hostname -f)
+    file=/mnt/test/data_`date +%s`_$hostname
     hashfile=/mnt/test/hashfile
     do
         dd if=/dev/urandom of=$file bs=4k count=$(($RANDOM%3+1)) oflag=direct
