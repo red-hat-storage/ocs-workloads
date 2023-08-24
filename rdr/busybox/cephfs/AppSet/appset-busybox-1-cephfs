@@ -23,7 +23,7 @@ spec:
         targetRevision: master
         path: rdr/busybox/cephfs/app-busybox-1/resources/deployment
       destination:
-        namespace: appset-busybox-1
+        namespace: appset-busybox-1-cephfs
         server: "{{server}}"
       syncPolicy:
         automated:
