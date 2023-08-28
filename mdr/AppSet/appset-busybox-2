@@ -21,7 +21,7 @@ spec:
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads.git
         targetRevision: master
-        path: mdr/subscriptions/busybox-app-1/resources/deployment
+        path: mdr/subscriptions/busybox-app-2/resources/deployment
       destination:
         namespace: appset-busybox-2
         server: "{{server}}"
