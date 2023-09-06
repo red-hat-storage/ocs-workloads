@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: io-writer-mongodb
+  labels:
+    io: io-writer-mongodb
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      io: io-writer-mongodb
+  template:
+    metadata:
+      labels:
+        io: io-writer-mongodb
+    spec:
+      initContainers:
+      - name: init-myservice
+        image: quay.io/prometheus/busybox:latest
+        command: ['sh', '-c', "until nslookup mongodb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+      containers:
+      - name: mongodb
+        image: quay.io/prsurve/mongodb_data_write:main
+        command: ['/usr/bin/python3', '/script/db.py']
+        imagePullPolicy: Always
+        env:
+         - name: MONGO_DB_HOST
+           value: mongodb
+         - name: MONGO_DB_PORT
+           value: '27017'
+         - name: MONGO_DB_USER
+           valueFrom:
+            secretKeyRef:
+              name: mongo-creds
+              key: username
+         - name: MONGO_DB_PASSWORD
+           valueFrom:
+             secretKeyRef:
+               name: mongo-creds
+               key: password
