@@ -8,9 +8,12 @@ metadata:
 spec:
   preferredCluster: "PLACEHOLDER-C1-ClusterName"
   drPolicyRef:
+    apiVersion: ramendr.openshift.io/v1alpha1
+    kind: DRPolicy
     name: PLACEHOLDER-DRPOLICY-NAME
   placementRef:
-    kind: PlacementRule
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    kind: Placement
     name: busybox-placement
   pvcSelector:
     matchLabels:
