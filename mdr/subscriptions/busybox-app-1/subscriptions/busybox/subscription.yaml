@@ -9,7 +9,7 @@ metadata:
     app: busybox-sample
   name: busybox-sub
 spec:
-    channel: ramen-samples/ramen-gitops
+    channel: ramen-busybox-1/ramen-gitops
     placement:
       placementRef:
         kind: PlacementRule
