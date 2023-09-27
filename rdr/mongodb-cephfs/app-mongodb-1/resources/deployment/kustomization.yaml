@@ -1,0 +1,6 @@
+resources:
+- io_writer_mongodb.yaml
+- mongodb-deployment.yaml
+- mongodb-pvc.yaml
+- mongodb-secrets.yaml
+- mongodb-service.yaml
