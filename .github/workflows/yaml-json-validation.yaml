@@ -1,4 +1,4 @@
-name: "Yaml Json Dalidation"
+name: "Yaml Json Validation"
 # Triggers the workflow on pull request events
 on: pull_request
 
@@ -12,3 +12,5 @@ jobs:
 
       - name: json-yaml-validate
         uses: GrantBirki/json-yaml-validate@v2.3.1
+        with:
+          exclude_file: exclude.txt
