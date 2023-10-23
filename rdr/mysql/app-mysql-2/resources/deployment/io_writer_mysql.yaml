@@ -14,8 +14,12 @@ spec:
       labels:
         io: io-writer-mysql
     spec:
+      initContainers:
+      - name: init-mysqlservice
+        image: quay.io/prometheus/busybox:latest
+        command: ['sh', '-c', "until nslookup mysql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mysql service; sleep 2; done"]
       containers:
-      - name: fedora
+      - name: mysql
         image: quay.io/prsurve/mysql_data_write:latest
         command: ['/usr/bin/python3', '/script/db.py']
         imagePullPolicy: Always
