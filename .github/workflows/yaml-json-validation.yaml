@@ -1,0 +1,16 @@
+name: "Yaml Json Validation"
+# Triggers the workflow on pull request events
+on: pull_request
+
+jobs:
+  yaml-json-validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
+
+      - name: json-yaml-validate
+        uses: GrantBirki/json-yaml-validate@v2.3.1
+        with:
+          exclude_file: exclude.txt

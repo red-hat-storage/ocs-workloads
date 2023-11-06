@@ -1,0 +1,6 @@
+# exclude all files in the test/ directory
+amq/
+eck/
+jenkins/
+mix-fs-rbd/
+mdr/
