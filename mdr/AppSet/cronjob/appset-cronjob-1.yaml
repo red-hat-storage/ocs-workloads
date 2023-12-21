@@ -20,7 +20,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/Akarsha-rai/ocs-workloads
+        repoURL: https://github.com/red-hat-storage/ocs-workloads
         targetRevision: master
         path: mdr/cronjob
       destination:
