@@ -1,0 +1,17 @@
+---
+apiVersion: ramendr.openshift.io/v1alpha1
+kind: DRPlacementControl
+metadata:
+  name: job-1-drpc
+  labels:
+    app: job-1-sample
+spec:
+  preferredCluster: "PLACEHOLDER-C1-ClusterName"
+  drPolicyRef:
+    name: PLACEHOLDER-DRPOLICY-NAME
+  placementRef:
+    kind: PlacementRule
+    name: job-1-placement
+  pvcSelector:
+    matchLabels:
+      appname: job-1-pvc

@@ -1,0 +1,17 @@
+---
+apiVersion: ramendr.openshift.io/v1alpha1
+kind: DRPlacementControl
+metadata:
+  name: fluentd-1-drpc
+  labels:
+    app: fluentd-1-sample
+spec:
+  preferredCluster: "PLACEHOLDER-C1-ClusterName"
+  drPolicyRef:
+    name: PLACEHOLDER-DRPOLICY-NAME
+  placementRef:
+    kind: PlacementRule
+    name: fluentd-1-placement
+  pvcSelector:
+    matchLabels:
+      appname: fluentd-daemon

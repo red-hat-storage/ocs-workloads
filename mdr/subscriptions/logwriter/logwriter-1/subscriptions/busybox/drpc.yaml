@@ -1,0 +1,17 @@
+---
+apiVersion: ramendr.openshift.io/v1alpha1
+kind: DRPlacementControl
+metadata:
+  name: logwriter-1-drpc
+  labels:
+    app: logwriter-1-sample
+spec:
+  preferredCluster: "PLACEHOLDER-C1-ClusterName"
+  drPolicyRef:
+    name: PLACEHOLDER-DRPOLICY-NAME
+  placementRef:
+    kind: PlacementRule
+    name: logwriter-1-placement
+  pvcSelector:
+    matchLabels:
+      appname: logwriter
