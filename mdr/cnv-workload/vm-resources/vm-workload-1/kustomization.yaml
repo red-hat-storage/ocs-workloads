@@ -1,0 +1,13 @@
+---
+resources:
+  - vm-1-source.yaml
+  - vm-1-pvc.yaml
+  - vm-workload-1.yaml
+commonLabels:
+  appname: kubevirt
+secretGenerator:
+- name: my-public-key
+  files:
+  - test_rsa.pub
+generatorOptions:
+  disableNameSuffixHash: true
