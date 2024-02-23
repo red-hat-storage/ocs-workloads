@@ -50,7 +50,7 @@ spec:
         - sshPublicKey:
             source:
               secret:
-                secretName: vm-secret-1
+                secretName: my-public-key
             propagationMethod:
               noCloud: {}
       volumes:
