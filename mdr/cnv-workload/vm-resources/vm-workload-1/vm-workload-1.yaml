@@ -62,5 +62,5 @@ spec:
             userData: |-
               #user-config
               user: cirros
-              password: 7lua-f8o8-nk3t
+              password: gocubsgo
               chpasswd: { expire: False }
