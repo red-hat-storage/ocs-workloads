@@ -59,6 +59,8 @@ spec:
             claimName: vm-1-pvc
         - name: cloudinit
           cloudInitConfigDrive:
-            userData: |
-              #!/bin/sh
-              echo "Running user-data script"
+            userData: |-
+              #user-config
+              user: cirros
+              password: 7lua-f8o8-nk3t
+              chpasswd: { expire: False }
