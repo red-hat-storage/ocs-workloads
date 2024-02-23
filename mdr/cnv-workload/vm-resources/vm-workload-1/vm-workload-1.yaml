@@ -52,13 +52,13 @@ spec:
               secret:
                 secretName: my-public-key
             propagationMethod:
-              noCloud: {}
+              configDrive: {}
       volumes:
         - name: rootdisk
           persistentVolumeClaim:
             claimName: vm-1-pvc
         - name: cloudinit
-          cloudInitNoCloud:
+          cloudInitConfigDrive:
             userData: |-
               #user-config
               user: cirros
