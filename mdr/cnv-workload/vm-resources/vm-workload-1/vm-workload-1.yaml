@@ -50,7 +50,7 @@ spec:
         - sshPublicKey:
             source:
               secret:
-                secretName: my-public-key
+                secretName: vm-secret-1
             propagationMethod:
               configDrive: {}
       volumes:
