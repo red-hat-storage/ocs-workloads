@@ -13,6 +13,7 @@ spec:
       storage: 10Gi
 
 ---
+
 apiVersion: batch/v1
 kind: CronJob
 metadata:
