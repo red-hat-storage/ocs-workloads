@@ -14,4 +14,4 @@ jobs:
         uses: GrantBirki/json-yaml-validate@v2.3.1
         with:
           # exclude_file: exclude.txt
-          allow_multiple_documents: true
+          allow_multiple_documents: "true"
