@@ -12,6 +12,6 @@ jobs:
 
       - name: json-yaml-validate
         uses: GrantBirki/json-yaml-validate@v2.3.1
-        with:
+        inputs:
           # exclude_file: exclude.txt
           allow_multiple_documents: "true"
