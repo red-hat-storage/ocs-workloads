@@ -20,7 +20,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads
-        targetRevision: cnv_updates
+        targetRevision: master
         path: mdr/cnv-workload/vm-resources/vm-workload-1
       destination:
         namespace: vm-appset-1
