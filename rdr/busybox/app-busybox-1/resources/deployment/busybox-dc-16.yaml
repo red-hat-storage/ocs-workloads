@@ -15,6 +15,7 @@ spec:
     metadata:
       labels:
         workload: busybox-16
+
     spec:
       initContainers:
       - name: init-integrity-check
