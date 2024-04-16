@@ -8,7 +8,7 @@ jobs:
 
     steps:
       - name: Get Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: json-yaml-validate
         uses: GrantBirki/json-yaml-validate@v2.6.2
