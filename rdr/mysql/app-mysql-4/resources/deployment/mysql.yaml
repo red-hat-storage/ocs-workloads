@@ -1,23 +1,25 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
+  labels:
+    app: mysql
   name: mysql
 spec:
   selector:
     matchLabels:
-     workload : mysql
+      workload: mysql
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        workload : mysql
+        workload: mysql
     spec:
       containers:
       - image: quay.io/prsurve/mysql:latest
         name: mysql
         env:
-          # Use secret in real usage
+        # Use secret in real usage
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
