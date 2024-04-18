@@ -50,7 +50,7 @@ spec:
         - sshPublicKey:
             source:
               secret:
-                secretName: my-public-key
+                secretName: vm-secret-1
             propagationMethod:
               configDrive: {}
       volumes:
@@ -59,6 +59,8 @@ spec:
             claimName: vm-1-pvc
         - name: cloudinit
           cloudInitConfigDrive:
-            userData: |
-              #!/bin/sh
-              echo "Running user-data script"
+            userData: |-
+              #user-config
+              user: cirros
+              password: gocubsgo
+              chpasswd: { expire: False }
