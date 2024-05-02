@@ -39,3 +39,5 @@ resources:
 - busybox-pvc-59.yaml
 - busybox-dc-60.yaml
 - busybox-pvc-60.yaml
+commonLabels:
+  app-name: app-busybox-rbd-3
