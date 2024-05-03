@@ -4,3 +4,6 @@ resources:
 - mongodb-pvc.yaml
 - mongodb-secrets.yaml
 - mongodb-service.yaml
+commonLabels:
+  app-name: app-mongodb-rbd-1
+  

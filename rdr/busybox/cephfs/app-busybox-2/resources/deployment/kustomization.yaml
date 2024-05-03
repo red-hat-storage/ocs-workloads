@@ -7,3 +7,5 @@ resources:
 - busybox-pvc-2.yaml
 - busybox-pvc-3.yaml
 - busybox-pvc-4.yaml
+commonLabels:
+  app-name: app-busybox-cephfs-2
