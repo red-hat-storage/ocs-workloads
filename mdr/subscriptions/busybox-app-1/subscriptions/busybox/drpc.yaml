@@ -10,7 +10,7 @@ spec:
   drPolicyRef:
     name: PLACEHOLDER-DRPOLICY-NAME
   placementRef:
-    kind: PlacementRule
+    kind: Placement
     name: busybox-placement
   pvcSelector:
     matchLabels:
