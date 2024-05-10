@@ -13,4 +13,4 @@ spec:
     placement:
       placementRef:
         kind: Placement
-        name: busybox-placement
+        name: busybox-1-placement
