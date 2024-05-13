@@ -13,5 +13,5 @@ spec:
   resources:
     requests:
       storage: 512Mi
-  storageClassName: ocs-storagecluster-ceph-rbd
+  storageClassName: ocs-storagecluster-ceph-rbd-virtualization
   volumeMode: Block
