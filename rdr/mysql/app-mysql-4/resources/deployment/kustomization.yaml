@@ -5,5 +5,6 @@ resources:
 - mysql_service.yaml
 - io_writer_mysql.yaml
 - mysql_secret.yaml
+- mysql_configmap.yaml
 commonLabels:
   app-name: app-mysql-rbd-4
