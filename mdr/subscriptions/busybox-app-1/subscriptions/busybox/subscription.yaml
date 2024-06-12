@@ -12,5 +12,5 @@ spec:
     channel: ramen-busybox-1/ramen-gitops
     placement:
       placementRef:
-        kind: PlacementRule
-        name: busybox-placement
+        kind: Placement
+        name: busybox-1-placement
