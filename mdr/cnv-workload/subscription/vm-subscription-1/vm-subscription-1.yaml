@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vm-sub-1
+---
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: vm-sub-1
+  namespace: vm-sub-1
+spec:
+  componentKinds:
+  - group: apps.open-cluster-management.io
+    kind: Subscription
+  descriptor: {}
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - vm-sub-1
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  annotations:
+    apps.open-cluster-management.io/git-branch: master
+    apps.open-cluster-management.io/git-path: mdr/cnv-workload/vm-resources/vm-workload-1
+    apps.open-cluster-management.io/reconcile-option: merge
+  labels:
+    app: vm-sub-1
+  name: vm-sub-1-subscription-1
+  namespace: vm-sub-1
+spec:
+  channel: channel-vm-ns-1/channel-vm-1
+  placement:
+    placementRef:
+      kind: Placement
+      name: vm-sub-1-placement
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: global
+  namespace: vm-sub-1
+spec:
+  clusterSet: global
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  labels:
+    app: vm-sub-1
+  name: vm-sub-1-placement
+  namespace: vm-sub-1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: 'name'
+              operator: 'In'
+              values:
+                - PLACEHOLDER
+  clusterSets:
+    - global
