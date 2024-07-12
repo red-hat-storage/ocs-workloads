@@ -29,7 +29,7 @@ metadata:
     apps.open-cluster-management.io/reconcile-option: merge
   labels:
     app: vm-sub-1
-  name: vm-sub-1-subscription-1
+  name: vm-s-1
   namespace: vm-sub-1
 spec:
   channel: channel-vm-ns-1/channel-vm-1
