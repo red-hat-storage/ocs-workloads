@@ -3,9 +3,6 @@ approvers:
   - shylesh
   - keesturam
   - prsurve
-  - am-agrawa
-  - Akarsha-rai
-  - sidhant-agrawal
 # review == this code is good /lgtm
 reviewers:
   - shylesh
