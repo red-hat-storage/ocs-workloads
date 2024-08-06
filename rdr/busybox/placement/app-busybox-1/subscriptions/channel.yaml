@@ -1,0 +1,8 @@
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  name: ramen-gitops-placement
+spec:
+  type: GitHub
+  pathname: https://github.com/PLACEHOLDER/ocs-workloads.git
