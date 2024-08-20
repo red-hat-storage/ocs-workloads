@@ -15,6 +15,7 @@ spec:
     metadata:
       labels:
         workload: busybox-20
+        workloadpattern: simple_io
     spec:
       initContainers:
       - name: init-integrity-check

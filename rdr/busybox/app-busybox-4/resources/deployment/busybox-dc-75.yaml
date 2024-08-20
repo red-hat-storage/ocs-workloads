@@ -14,6 +14,7 @@ spec:
     metadata:
       labels:
         workload: busybox-75
+        workloadpattern: simple_io
     spec:
       containers:
       - command:
