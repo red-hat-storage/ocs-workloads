@@ -1,3 +1,4 @@
+---
 apiVersion: apps.open-cluster-management.io/v1
 kind: Subscription
 metadata:
@@ -8,7 +9,7 @@ metadata:
     app: busybox-sample-cephfs-3
   name: busybox-sub
 spec:
-    channel: ramen-busybox-cephfs-e/ramen-gitops
+    channel: ramen-busybox-cephfs-3/ramen-gitops
     placement:
       placementRef:
         kind: PlacementRule

@@ -1,0 +1,13 @@
+resources:
+- busybox-dc-101.yaml
+- busybox-pvc-101.yaml
+- busybox-dc-102.yaml
+- busybox-pvc-102.yaml
+- busybox-dc-103.yaml
+- busybox-pvc-103.yaml
+- busybox-dc-104.yaml
+- busybox-pvc-104.yaml
+- busybox-dc-105.yaml
+- busybox-pvc-105.yaml
+commonLabels:
+  app-name: app-busybox-rbd-6
