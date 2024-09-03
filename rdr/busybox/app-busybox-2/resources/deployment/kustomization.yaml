@@ -1,14 +1,23 @@
 resources:
-- busybox-dc-21.yaml
-- busybox-pvc-21.yaml
-- busybox-dc-22.yaml
-- busybox-pvc-22.yaml
-- busybox-dc-23.yaml
-- busybox-pvc-23.yaml
-- busybox-dc-24.yaml
-- busybox-pvc-24.yaml
-- busybox-dc-25.yaml
-- busybox-pvc-25.yaml
+- busybox-dc-11.yaml
+- busybox-pvc-11.yaml
+- busybox-dc-12.yaml
+- busybox-pvc-12.yaml
+- busybox-dc-13.yaml
+- busybox-pvc-13.yaml
+- busybox-dc-14.yaml
+- busybox-pvc-14.yaml
+- busybox-dc-15.yaml
+- busybox-pvc-15.yaml
+- busybox-dc-16.yaml
+- busybox-pvc-16.yaml
+- busybox-dc-17.yaml
+- busybox-pvc-17.yaml
+- busybox-dc-18.yaml
+- busybox-pvc-18.yaml
+- busybox-dc-19.yaml
+- busybox-pvc-19.yaml
+- busybox-dc-20.yaml
+- busybox-pvc-20.yaml
 commonLabels:
   app-name: app-busybox-rbd-2
-  
