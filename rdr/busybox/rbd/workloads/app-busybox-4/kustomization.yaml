@@ -1,0 +1,28 @@
+resources:
+- ../../base
+patches:
+  - target:
+      kind: Deployment
+      labelSelector: workloadpattern=simple_io
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/initContainers
+        value: {}
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: quay.io/ocsci/busybox:latest
+      - op: replace
+        path: /spec/template/spec/containers/0/command
+        value:  ['sh', '-c', 'while true; do echo $(date) | tee -a /mnt/test/outfile; sync; sleep 2; done']
+      - op: remove
+        path: /spec/template/spec/containers/0/args
+        value:  {}
+      - op: remove
+        path: /spec/template/spec/containers/0/env
+        value:  {}
+      - op: replace
+        path: /metadata/labels/workloadpattern
+        value: date_time
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app_4

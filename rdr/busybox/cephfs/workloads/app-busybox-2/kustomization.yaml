@@ -1,0 +1,23 @@
+resources:
+- ../../../base
+patches:
+  - target:
+      kind: Deployment
+      labelSelector: workloadpattern=simple_io
+    patch: |-
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app_2
+  - target:
+      kind: PersistentVolumeClaim
+      labelSelector: appname=busybox_app1
+    patch: |-
+      - op: replace
+        path: /spec/accessModes/0
+        value: ReadWriteMany
+      - op: replace
+        path: /spec/storageClassName
+        value: ocs-storagecluster-cephfs
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app2_cephfs

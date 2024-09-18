@@ -1,0 +1,10 @@
+resources:
+- ../../base
+patches:
+  - target:
+      kind: Deployment
+      labelSelector: workloadpattern=simple_io
+    patch: |-
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app_2
