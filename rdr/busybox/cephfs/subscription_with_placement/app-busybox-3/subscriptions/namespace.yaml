@@ -2,4 +2,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ramen-busybox-3
+  name: ramen-busybox-cephfs-3
