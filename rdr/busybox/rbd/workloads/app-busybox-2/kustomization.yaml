@@ -8,3 +8,10 @@ patches:
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app_2
+  - target:
+      kind: PersistentVolumeClaim
+      labelSelector: appname=busybox_app1
+    patch: |-
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app2
