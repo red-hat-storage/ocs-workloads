@@ -19,7 +19,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/red-hat-storage/ocs-workloads.git
+        repoURL: https://github.com/prsurve/ocs-workloads.git
         targetRevision: restructure_rdr
         path: rdr/busybox/rbd/workloads/app-busybox-5
       destination:
