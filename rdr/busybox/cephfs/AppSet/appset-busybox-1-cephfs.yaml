@@ -19,7 +19,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/master/ocs-workloads.git
+        repoURL: https://github.com/red-hat-storage/ocs-workloads.git
         targetRevision: master
         path: rdr/busybox/cephfs/workloads/app-busybox-1
       destination:
