@@ -19,8 +19,8 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/prsurve/ocs-workloads.git
-        targetRevision: restructure_rdr
+        repoURL: https://github.com/master/ocs-workloads.git
+        targetRevision: master
         path: rdr/busybox/rbd/workloads/app-busybox-5
       destination:
         namespace: appset-busybox-5

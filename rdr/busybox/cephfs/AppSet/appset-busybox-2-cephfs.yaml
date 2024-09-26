@@ -19,8 +19,8 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/prsurve/ocs-workloads.git
-        targetRevision: restructure_rdr
+        repoURL: https://github.com/master/ocs-workloads.git
+        targetRevision: master
         path: rdr/busybox/cephfs/workloads/app-busybox-2
       destination:
         namespace: appset-busybox-2-cephfs
