@@ -1,0 +1,18 @@
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  labels:
+    appname: vm
+  name: root-disk
+spec:
+  source:
+    registry:
+      url: docker://quay.io/nirsof/cirros:0.6.2-1
+  storage:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 512Mi
+    storageClassName: ocs-storagecluster-ceph-rbd-virtualization
