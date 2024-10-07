@@ -1,4 +1,0 @@
-namespace: ramen-busybox-multisnap-1
-resources:
-- channel.yaml
-- namespace.yaml

@@ -1,0 +1,35 @@
+resources:
+- ../../../base
+patches:
+  - target:
+      kind: Deployment
+      labelSelector: workloadpattern=simple_io
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/initContainers
+        value: {}
+      - op: replace
+        path: /spec/template/spec/containers/0/command
+        value:  ["/bin/sh", "-c"]
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:  ["wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/kernel_untar.sh -O /mnt/test/kernel_untar.sh; wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/kernel_untar_integrity_check.sh -O /mnt/test/kernel_untar_integrity_check.sh; chmod +x /mnt/test/kernel_untar.sh; chmod +x /mnt/test/kernel_untar_integrity_check.sh; /mnt/test/kernel_untar.sh"]
+      - op: replace
+        path: /spec/template/spec/containers/0/env/0/value
+        value: /mnt/test/kernel_untar.sh
+      - op: replace
+        path: /spec/template/spec/containers/0/env/1/value
+        value: /mnt/test/kernel_untar_integrity_check.sh
+      - op: replace
+        path: /metadata/labels/workloadpattern
+        value: kernel_untar
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app_6
+  - target:
+      kind: PersistentVolumeClaim
+      labelSelector: appname=busybox_app1
+    patch: |-
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app6

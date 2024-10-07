@@ -1,0 +1,4 @@
+namespace: ramen-busybox-cephfs-2
+resources:
+- channel.yaml
+- namespace.yaml
