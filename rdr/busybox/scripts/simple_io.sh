@@ -10,13 +10,16 @@ do
     for i in 1 2 3 4 5
     do
         timestamp=$(date +%s)
+
+        random_number=$(echo $((RANDOM % 100000))$(($RANDOM % 100000)))
+
         # Randomly select a special character
         random_index=$(($RANDOM % ${#special_chars} + 1))
         random_char=$(echo "$special_chars" | cut -c"$random_index")
 
         # Create a filename with the random special character
 
-        file=/mnt/test/data_${timestamp}_${hostname}_$random_char
+        file=/mnt/test/data_${timestamp}_${hostname}_${random_number}_$random_char
         echo "$(date): Creating file: $file"
         dd if=/dev/urandom of=$file bs=1k count=$(($RANDOM%3+1)) oflag=direct
         md5sum $file >>$hashfile

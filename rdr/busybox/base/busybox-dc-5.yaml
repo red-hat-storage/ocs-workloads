@@ -6,6 +6,7 @@ metadata:
     workloadpattern: simple_io
   name: busybox-5
 spec:
+  replicas: 5
   selector:
     matchLabels:
       workload: busybox-5

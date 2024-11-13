@@ -6,6 +6,7 @@ metadata:
     workloadpattern: simple_io
   name: busybox-9
 spec:
+  replicas: 5
   selector:
     matchLabels:
       workload: busybox-9
@@ -16,18 +17,6 @@ spec:
       labels:
         workload: busybox-9
     spec:
-      initContainers:
-      - name: init-integrity-check
-        image: quay.io/ocsci/rdr-ocs-workload
-        env:
-        - name: CONTAINER_VALUE
-          value: "init"
-        command: ['sh', '-c']
-        args:
-        - wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/master/rdr/busybox/scripts/simple_io_integrity_check.sh  -O /mnt/simple_io_integrity_check.sh; chmod +x /mnt/simple_io_integrity_check.sh; /mnt/simple_io_integrity_check.sh
-        volumeMounts:
-        - mountPath: /mnt/test
-          name: mypvc
       containers:
       - command: ["/bin/sh", "-c"]
         args:
