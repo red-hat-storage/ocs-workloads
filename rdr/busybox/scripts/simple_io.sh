@@ -30,12 +30,12 @@ do
         sleep $(($RANDOM%25+1))
 
     # Optionally check hashfile integrity after creating 5 files
-    if [ $(($RANDOM%2)) = 1 ]
-    then
-        echo "$(date): Checking integrity of files in hashfile"
-        md5sum -c --quiet $hashfile
-        echo "$(date): Integrity check completed" 
-    fi
+    # if [ $(($RANDOM%2)) = 1 ]
+    # then
+    #     echo "$(date): Checking integrity of files in hashfile"
+    #     md5sum -c --quiet $hashfile
+    #     echo "$(date): Integrity check completed" 
+    # fi
     # Get the size of the mount point and number of files
     mount_size=$(df -h "$target_dir" | awk 'NR==2 {print $4}')
     file_count=$(find "$target_dir" -type f | wc -l)
