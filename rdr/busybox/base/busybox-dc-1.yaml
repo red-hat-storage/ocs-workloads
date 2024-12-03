@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   labels:
     appname: busybox_app1-1
+    workload_set: set_1
     workloadpattern: simple_io
   name: busybox-1
 spec:
