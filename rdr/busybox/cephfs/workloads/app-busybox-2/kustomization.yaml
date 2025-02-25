@@ -8,6 +8,9 @@ patches:
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app_2
+      - op: add
+        path: /spec/replicas
+        value: 2
   - target:
       kind: PersistentVolumeClaim
       labelSelector: appname=busybox_app1
@@ -21,3 +24,19 @@ patches:
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app2_cephfs
+  - target:
+      kind: Deployment
+      labelSelector: workload_set=set_2
+    patch: |-
+      kind: Deployment
+      metadata:
+        name: busybox-3
+      $patch: delete
+  - target:
+      kind: PersistentVolumeClaim
+      labelSelector: workload_set=set_2
+    patch: |-
+      kind: PersistentVolumeClaim
+      metadata:
+        name: busybox-pvc-6
+      $patch: delete
