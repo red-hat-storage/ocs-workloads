@@ -1,6 +1,10 @@
+Cyan='\033[0;36m'         
+NC='\033[0m' # No Color
+
 while true
     hostname=$(hostname -f)
     file=/mnt/test/data_`date +%s`_$hostname
+    printf "Creating file with name:-  ${Cyan}$file ${NC}\n"
     hashfile=/mnt/test/hashfile
     do
         dd if=/dev/urandom of=$file bs=4k count=$(($RANDOM%3+1)) oflag=direct
