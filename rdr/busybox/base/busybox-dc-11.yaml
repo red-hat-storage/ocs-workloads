@@ -2,19 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    appname: busybox_app1-1
+    appname: busybox_app1-11
     workloadpattern: simple_io
-  name: busybox-1
+  name: busybox-11
 spec:
   selector:
     matchLabels:
-      workload: busybox-1
+      workload: busybox-11
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        workload: busybox-1
+        workload: busybox-11
     spec:
       initContainers:
       - name: init-integrity-check
@@ -49,5 +49,5 @@ spec:
       volumes:
       - name: mypvc
         persistentVolumeClaim:
-          claimName: busybox-pvc-1
+          claimName: busybox-pvc-11
           readOnly: false
