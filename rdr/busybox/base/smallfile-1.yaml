@@ -1,0 +1,23 @@
+apiVersion: ripsaw.cloudbulldozer.io/v1alpha1
+kind: Benchmark
+metadata:
+  name: example-benchmark
+  namespace: benchmark-operator
+spec:
+  test_user: homer_simpson
+  clustername: nuclear-power-plant
+  elasticsearch:
+    url: http://my.elasticsearch.server:9200
+  workload:
+    name: smallfile
+    args:
+      #drop_cache_kernel: true
+      #drop_cache_rook_ceph: true
+      #storageclass: my-kubernetes-storageclass
+      storagesize: 2Gi
+      clients: 3
+      samples: 1
+      operation: ["create", "read"]
+      threads: 5
+      file_size: 64
+      files: 100
