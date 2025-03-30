@@ -3,6 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     appname: busybox_app1
+    workloadpattern: simple_io_pvc
   name: busybox-pvc-10
 spec:
   accessModes:
