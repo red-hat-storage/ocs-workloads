@@ -1,7 +1,7 @@
 #!/bin/bash
 
 HASHFILE="/mnt/test/hashfile"
-MAX_FILES=100
+MAX_FILES=1000000
 
 # Check if hashfile exists
 if [ -f "$HASHFILE" ]; then

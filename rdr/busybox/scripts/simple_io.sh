@@ -3,7 +3,7 @@ Cyan='\033[0;36m'
 NC='\033[0m' # No Color
 
 hashfile="/mnt/test/hashfile"
-max_files=100000
+max_files=1000000
 count=0
 
 while [ $count -lt $max_files ]; do
