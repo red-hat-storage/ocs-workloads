@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb
+  labels:
+    appname: mysql_app_1
+data:
+  initdb.sql: |
+
+    ALTER USER 'root'@'localhost' IDENTIFIED BY 'password'
+    GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+    ALTER USER 'root'@'%' IDENTIFIED BY 'password';
+    GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+    FLUSH PRIVILEGES;

@@ -1,0 +1,9 @@
+resources:
+- ../../../base
+patches:
+  - target:
+      labelSelector: appname=mysql_app_1
+    patch: |-
+      - op: replace
+        path: /metadata/labels/appname
+        value: mysql_app_2

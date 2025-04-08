@@ -1,0 +1,22 @@
+resources:
+- ../../../base
+patches:
+  - target:
+      labelSelector: appname=mysql_app_1
+    patch: |-
+      - op: replace
+        path: /metadata/labels/appname
+        value: mysql_app_1
+  - target:
+      kind: PersistentVolumeClaim
+      labelSelector: appname=mysql_app_1
+    patch: |-
+      - op: replace
+        path: /spec/accessModes/0
+        value: ReadWriteMany
+      - op: replace
+        path: /spec/storageClassName
+        value: ocs-storagecluster-cephfs
+      - op: replace
+        path: /metadata/labels/appname
+        value: mysql_app_1

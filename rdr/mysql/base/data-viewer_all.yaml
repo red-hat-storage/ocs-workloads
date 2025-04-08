@@ -1,0 +1,155 @@
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: data-viewer
+      app.kubernetes.io/component: data-viewer
+      app.kubernetes.io/instance: data-viewer
+      appname: mysql_app_1
+    name: data-viewer
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: data-viewer
+      app.kubernetes.io/component: data-viewer
+      app.kubernetes.io/instance: data-viewer
+      appname: mysql_app_1
+    name: data-viewer
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: data-viewer:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/prsurve/data-viewer.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: php:7.4-ubi8
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: XxYL87AZIAckGXicUzQ1
+      type: GitHub
+    - generic:
+        secret: 2AWacAMAwVLw9ZfXTdsZ
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"data-viewer:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"data-viewer\")].image"}]'
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: data-viewer
+      app.kubernetes.io/component: data-viewer
+      app.kubernetes.io/instance: data-viewer
+      appname: mysql_app_1
+    name: data-viewer
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        deployment: data-viewer
+    strategy: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          deployment: data-viewer
+      spec:
+        containers:
+        - image: ' '
+          name: data-viewer
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          - containerPort: 8443
+            protocol: TCP
+          resources: {}
+          env:
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mysqlsecret
+                  key: mysqldbpass
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: data-viewer
+      app.kubernetes.io/component: data-viewer
+      app.kubernetes.io/instance: data-viewer
+      appname: mysql_app_1
+    name: data-viewer
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    - name: 8443-tcp
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+    selector:
+      deployment: data-viewer
+  status:
+    loadBalancer: {}
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+        openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: data-viewer
+      app.kubernetes.io/component: data-viewer
+      app.kubernetes.io/instance: data-viewer
+      appname: mysql_app_1
+    name: data-viewer
+  spec:
+    port:
+      targetPort: 8080-tcp
+    tls:
+      termination: edge
+    to:
+      kind: Service
+      name: data-viewer
+kind: List
+metadata: {}
+
