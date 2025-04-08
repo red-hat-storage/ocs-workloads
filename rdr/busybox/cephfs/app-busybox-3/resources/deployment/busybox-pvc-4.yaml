@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     appname: busybox_app3_cephfs
-  name: busybox-pvc-4
+  name: busybox-pvc-4-busyboxapp-ocs-storagecluster-cephfs
 spec:
   accessModes:
   - ReadWriteMany
