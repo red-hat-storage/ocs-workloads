@@ -61,4 +61,8 @@ spec:
         persistentVolumeClaim:
           claimName: mysql-pv-claim
           readOnly: false
+      - name: mysql-initdb
+        configMap:
+          name: mysql-initdb
+
 
