@@ -16,8 +16,5 @@ patches:
         path: /spec/accessModes/0
         value: ReadWriteMany
       - op: replace
-        path: /spec/storageClassName
-        value: ocs-storagecluster-cephfs
-      - op: replace
         path: /metadata/labels/appname
         value: busybox_app4_cephfs
