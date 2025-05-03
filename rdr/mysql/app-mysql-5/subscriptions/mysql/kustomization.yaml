@@ -1,7 +1,0 @@
-namespace: mysql-workloads-5
-resources:
-- namespace.yaml
-- placement.yaml
-- subscription.yaml
-- drpc.yaml
-- app.yaml

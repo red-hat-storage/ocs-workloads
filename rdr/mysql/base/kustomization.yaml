@@ -1,0 +1,9 @@
+resources:
+- data-viewer_all.yaml
+- mysql.yaml
+- mysql_pvc.yaml
+- mysql_service.yaml
+- io_writer_mysql.yaml
+- mysql_secret.yaml
+- mysql_configmap.yaml
+  
