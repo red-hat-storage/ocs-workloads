@@ -33,3 +33,6 @@ patches:
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app3
+      - op: replace
+        path: /spec/storageClassName
+        value: rbd-custom-sc
