@@ -21,3 +21,7 @@ patches:
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app3_cephfs
+      - op: replace
+        path: /spec/storageClassName
+        value: cephfs-custom-sc
+
