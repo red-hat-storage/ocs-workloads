@@ -18,3 +18,5 @@ spec:
               operator: 'In'
               values:
                 - PLACEHOLDER
+  clusterSets:
+    - PLACEHOLDER
