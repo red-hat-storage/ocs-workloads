@@ -134,13 +134,17 @@ while true; do
     
     printf "Creating file with name: ${Cyan}$file${NC}\n"
 
+    # --- START: Temporary Test Event for Debugging ---
+    # This event will be created in every loop iteration to confirm event creation is working.
+    create_kubernetes_event "ScriptHeartbeat" \
+                            "Data writer script is active in pod ${POD_NAME}." \
+                            "Normal"
+    # --- END: Temporary Test Event for Debugging ---
+
     # Calculate and show time difference if previous epoch time is available
     if [ -n "$LAST_EPOCH_TIME" ]; then
         TIME_DIFFERENCE=$((CURRENT_EPOCH_TIME - LAST_EPOCH_TIME))
         echo "Time difference since last file creation: ${TIME_DIFFERENCE} seconds"
-        
-        # Removed: create_kubernetes_event for TimeDifferenceReport
-        # The user only wants events for pod name changes.
         
         # Check if POD_NAME has changed since the last iteration
         if [ "$POD_NAME" != "$LAST_POD_NAME" ]; then
