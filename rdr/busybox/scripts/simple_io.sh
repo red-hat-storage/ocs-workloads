@@ -23,7 +23,6 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
-# Main loop
 while true; do
     CURRENT_PODNAME="${KUBERNETES_POD_NAME:-unknownpod}"
     timestamp=$(date +%s)
@@ -52,18 +51,26 @@ while true; do
 
             echo "${Yellow}Time difference between last and current pod file: ${timediff} seconds${NC}"
 
-            # Create Kubernetes event
-            kubectl create -f - <<EOF
+            # Get pod UID for involvedObject
+            pod_uid=$(kubectl get pod "$CURRENT_PODNAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+
+            # Unique event name (cannot use generateName with kubectl create -f)
+            event_name="pod-switch-$(date +%s)"
+
+            echo "Creating event $event_name for pod $CURRENT_PODNAME in $NAMESPACE"
+
+            kubectl create -f - <<EOF 2>&1 | tee /tmp/kubectl_event.log
 apiVersion: v1
 kind: Event
 metadata:
-  generateName: pod-switch-
+  name: $event_name
   namespace: $NAMESPACE
 involvedObject:
   kind: Pod
   namespace: $NAMESPACE
   name: $CURRENT_PODNAME
   apiVersion: v1
+  uid: $pod_uid
 reason: PodNameChange
 message: Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME. Time diff: ${timediff}s.
 type: Normal
@@ -73,6 +80,12 @@ firstTimestamp: "$(date -Iseconds)"
 lastTimestamp: "$(date -Iseconds)"
 count: 1
 EOF
+
+            # Check if event creation failed
+            if [ ${PIPESTATUS[0]} -ne 0 ]; then
+                echo "Event creation failed:"
+                cat /tmp/kubectl_event.log
+            fi
         fi
 
         LAST_PODNAME="$CURRENT_PODNAME"
