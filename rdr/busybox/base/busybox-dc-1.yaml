@@ -16,6 +16,7 @@ spec:
       labels:
         workload: busybox-1
     spec:
+      serviceAccountName: data-writer-sa
       initContainers:
       - name: init-integrity-check
         image: quay.io/ocsci/rdr-ocs-workload
