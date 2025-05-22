@@ -8,6 +8,7 @@ NC='\033[0m' # No Color
 # Constants
 MOUNT="/mnt/test"
 HASHFILE="$MOUNT/hashfile"
+PYTHON_EVENT_SCRIPT="/mnt/test/create_event.py"
 
 # Get initial pod name and namespace from environment
 LAST_PODNAME="${KUBERNETES_POD_NAME:-unknownpod}"
@@ -23,6 +24,7 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
+# Main loop
 while true; do
     CURRENT_PODNAME="${KUBERNETES_POD_NAME:-unknownpod}"
     timestamp=$(date +%s)
@@ -37,7 +39,7 @@ while true; do
     md5sum "$file" >> "$HASHFILE"
     sync
 
-    # If pod name has changed, calculate time difference and emit event
+    # If pod name has changed, emit event
     if [ "$CURRENT_PODNAME" != "$LAST_PODNAME" ]; then
         echo "${Yellow}Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME${NC}"
 
@@ -51,40 +53,14 @@ while true; do
 
             echo "${Yellow}Time difference between last and current pod file: ${timediff} seconds${NC}"
 
-            # Get pod UID for involvedObject
-            pod_uid=$(kubectl get pod "$CURRENT_PODNAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+            # Get pod UID
+            pod_uid=$(kubectl get pod "$CURRENT_PODNAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}' 2>/dev/null)
 
-            # Unique event name (cannot use generateName with kubectl create -f)
-            event_name="pod-switch-$(date +%s)"
-
-            echo "Creating event $event_name for pod $CURRENT_PODNAME in $NAMESPACE"
-
-            kubectl create -f - <<EOF 2>&1 | tee /tmp/kubectl_event.log
-apiVersion: v1
-kind: Event
-metadata:
-  name: $event_name
-  namespace: $NAMESPACE
-involvedObject:
-  kind: Pod
-  namespace: $NAMESPACE
-  name: $CURRENT_PODNAME
-  apiVersion: v1
-  uid: $pod_uid
-reason: PodNameChange
-message: Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME. Time diff: ${timediff}s.
-type: Normal
-source:
-  component: pod-monitor-script
-firstTimestamp: "$(date -Iseconds)"
-lastTimestamp: "$(date -Iseconds)"
-count: 1
-EOF
-
-            # Check if event creation failed
-            if [ ${PIPESTATUS[0]} -ne 0 ]; then
-                echo "Event creation failed:"
-                cat /tmp/kubectl_event.log
+            if [ -n "$pod_uid" ]; then
+                echo "Calling Python script to create event..."
+                /mnt/test/venv/bin/python3 "$PYTHON_EVENT_SCRIPT" "$CURRENT_PODNAME" "$pod_uid" "$NAMESPACE" "$LAST_PODNAME" "$timediff"
+            else
+                echo "Failed to get pod UID for $CURRENT_PODNAME"
             fi
         fi
 
@@ -98,7 +74,7 @@ EOF
     SLEEP_PID=$!
     wait "$SLEEP_PID"
 
-    # Perform random integrity check
+    # Random integrity check
     if [ $((RANDOM % 2)) -eq 1 ]; then
         md5sum -c --quiet "$HASHFILE"
     fi
