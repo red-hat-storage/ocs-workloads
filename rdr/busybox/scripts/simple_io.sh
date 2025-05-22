@@ -58,6 +58,9 @@ while true; do
 
             if [ -n "$pod_uid" ]; then
                 echo "Calling Python script to create event..."
+                echo "Running Python event script:"
+                echo python3 "$PYTHON_EVENT_SCRIPT" "$CURRENT_PODNAME" "$pod_uid" "$NAMESPACE" "$LAST_PODNAME" "$timediff"
+
                 /mnt/test/venv/bin/python3 "$PYTHON_EVENT_SCRIPT" "$CURRENT_PODNAME" "$pod_uid" "$NAMESPACE" "$LAST_PODNAME" "$timediff"
             else
                 echo "Failed to get pod UID for $CURRENT_PODNAME"
