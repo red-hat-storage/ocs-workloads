@@ -95,20 +95,25 @@ EOF
 
     echo "Attempting to create Kubernetes event: Reason='$event_reason', Message='$event_message'"
 
-    # Send the POST request to the Kubernetes API server
-    # --cacert: Specifies the CA certificate to verify the API server's SSL certificate.
-    # -H: Sets the HTTP headers for Content-Type and Authorization (Bearer token).
-    # -d: Provides the JSON data for the request body.
-    # > /dev/null: Suppresses curl's output to keep the console clean.
-    curl -s -X POST \
-        --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
-        -H "Content-Type: application/json" \
-        -H "Authorization: Bearer $KUBE_TOKEN" \
-        --data "$EVENT_JSON" \
-        "${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/events" > /dev/null
+    # Send the POST request to the Kubernetes API server using wget
+    # --post-data: Specifies the data to be sent in a POST request.
+    # --header: Sets HTTP headers (Content-Type and Authorization).
+    # --no-check-certificate: Disables SSL certificate validation. This is often
+    #                         needed in Kubernetes for self-signed CAs when using wget,
+    #                         as wget doesn't have a direct equivalent to curl's --cacert
+    #                         for loading custom CA bundles for API calls.
+    # -O /dev/null: Redirects the output to /dev/null to suppress verbose output.
+    # -q: Quiet mode, suppresses wget's status messages.
+    wget --post-data="$EVENT_JSON" \
+         --header="Content-Type: application/json" \
+         --header="Authorization: Bearer $KUBE_TOKEN" \
+         --no-check-certificate \
+         -O /dev/null \
+         -q \
+         "${KUBE_API_SERVER}/api/v1/namespaces/${NAMESPACE}/events"
 
     if [ $? -ne 0 ]; then
-        echo "Error: Failed to create Kubernetes event. Check curl output for details (if not suppressed) or RBAC permissions."
+        echo "Error: Failed to create Kubernetes event using wget. Check output for details or RBAC permissions."
     fi
 }
 
