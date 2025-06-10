@@ -4,3 +4,4 @@ resources:
 - placement.yaml
 - subscription.yaml
 - app.yaml
+- managedclustersetbinding.yaml
