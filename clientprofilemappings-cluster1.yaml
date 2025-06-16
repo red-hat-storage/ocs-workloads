@@ -1,0 +1,23 @@
+apiVersion: csi.ceph.io/v1alpha1
+kind: ClientProfileMapping
+metadata:
+  creationTimestamp: "2025-05-29T10:43:00Z"
+  generation: 2
+  name: ocs-storagecluster
+  namespace: openshift-storage
+  ownerReferences:
+  - apiVersion: ocs.openshift.io/v1alpha1
+    kind: StorageClient
+    name: ocs-storagecluster
+    uid: 0785d6ed-35b3-4448-985b-e0609b73ce2e
+  resourceVersion: "16021592"
+  uid: 2816ea48-cf5b-417d-ab64-6c38c99c3de2
+spec:
+  mappings:
+  - blockPoolIdMapping:
+    - - "2"
+      - "9"
+    - - "13"
+      - "13"
+    localClientProfile: 01bf33de038b327272ad441a6836e389
+    remoteClientProfile: 01bf33de038b327272ad441a6836e389
