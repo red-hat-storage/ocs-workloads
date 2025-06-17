@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Color codes for formatted output
 Cyan='\033[0;36m'
@@ -68,20 +68,20 @@ while true; do
             first_ts=$(date -Iseconds)
 last_ts=$(date -Iseconds)
 
-kubectl create -f - <<EOF 2>&1 | tee /tmp/kubectl_event.log
+cat <<EOF | kubectl create -f - | tee /tmp/kubectl_event.log
 apiVersion: v1
 kind: Event
 metadata:
-  name: $event_name
-  namespace: $NAMESPACE
+  name: "$event_name"
+  namespace: "$NAMESPACE"
 involvedObject:
   kind: Pod
-  namespace: $NAMESPACE
-  name: $CURRENT_PODNAME
+  namespace: "$NAMESPACE"
+  name: "$CURRENT_PODNAME"
   apiVersion: v1
-  uid: $pod_uid
+  uid: "$pod_uid"
 reason: PodNameChange
-message: Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME. Time diff: ${timediff}s.
+message: "Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME. Time diff: ${timediff}s."
 type: Normal
 source:
   component: pod-monitor-script
@@ -89,6 +89,7 @@ firstTimestamp: "$first_ts"
 lastTimestamp: "$last_ts"
 count: 1
 EOF
+
 
 
             # Check if event creation failed
