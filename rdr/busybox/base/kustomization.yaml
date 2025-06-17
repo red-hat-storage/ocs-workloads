@@ -19,3 +19,6 @@ resources:
 - busybox-pvc-9.yaml
 - busybox-dc-10.yaml
 - busybox-pvc-10.yaml
+- serviceaccount.yaml
+- role.yaml
+- rolebinding.yaml
