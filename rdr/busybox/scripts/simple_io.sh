@@ -65,7 +65,10 @@ while true; do
 
             echo "Creating event $event_name for pod $CURRENT_PODNAME"
 
-            kubectl create -f - <<EOF 2>&1 | tee /tmp/kubectl_event.log
+            first_ts=$(date -Iseconds)
+last_ts=$(date -Iseconds)
+
+kubectl create -f - <<EOF 2>&1 | tee /tmp/kubectl_event.log
 apiVersion: v1
 kind: Event
 metadata:
@@ -82,10 +85,11 @@ message: Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME. Time diff: ${t
 type: Normal
 source:
   component: pod-monitor-script
-firstTimestamp: "$(date -Iseconds)"
-lastTimestamp: "$(date -Iseconds)"
+firstTimestamp: "$first_ts"
+lastTimestamp: "$last_ts"
 count: 1
 EOF
+
 
             # Check if event creation failed
             if [ ${PIPESTATUS[0]} -ne 0 ]; then
