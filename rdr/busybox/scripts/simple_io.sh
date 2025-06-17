@@ -1,27 +1,35 @@
 #!/bin/bash
 
-# Color codes for formatted output
+# Color codes
 Cyan='\033[0;36m'
 Yellow='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 # Constants
 MOUNT="/mnt/test"
 HASHFILE="$MOUNT/hashfile"
 LAST_PODFILE="$MOUNT/last_podname"
 
-# Get current pod name (hostname = pod name in K8s)
-CURRENT_PODNAME=$(hostname)
-NAMESPACE="${KUBERNETES_NAMESPACE:-default}"
+# Load ServiceAccount values
+TOKEN_FILE="/var/run/secrets/kubernetes.io/serviceaccount/token"
+CA_CERT="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+NAMESPACE_FILE="/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 
-# Load last pod name from file if it exists, else fallback
+# Read namespace
+NAMESPACE=$(cat "$NAMESPACE_FILE")
+API_SERVER="https://kubernetes.default.svc"
+
+# Get current pod name
+CURRENT_PODNAME=$(hostname)
+
+# Load last pod name from file if it exists
 if [ -f "$LAST_PODFILE" ]; then
     LAST_PODNAME=$(cat "$LAST_PODFILE")
 else
     LAST_PODNAME="$CURRENT_PODNAME"
 fi
 
-# Trap to handle termination signals (SIGINT, SIGTERM)
+# Trap to handle termination
 cleanup() {
     echo "Received termination signal! Syncing data and exiting..."
     sync
@@ -29,6 +37,50 @@ cleanup() {
     exit 1
 }
 trap cleanup SIGINT SIGTERM
+
+# Function to create event via Kubernetes API
+create_event_directly() {
+    local token
+    token=$(cat "$TOKEN_FILE")
+
+    local event_json
+    event_json=$(cat <<EOF
+{
+  "apiVersion": "v1",
+  "kind": "Event",
+  "metadata": {
+    "name": "$event_name",
+    "namespace": "$NAMESPACE"
+  },
+  "involvedObject": {
+    "kind": "Pod",
+    "namespace": "$NAMESPACE",
+    "name": "$CURRENT_PODNAME",
+    "apiVersion": "v1",
+    "uid": "$pod_uid"
+  },
+  "reason": "PodNameChange",
+  "message": "Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME. Time diff: ${timediff}s.",
+  "type": "Normal",
+  "source": {
+    "component": "pod-monitor-script"
+  },
+  "firstTimestamp": "$first_ts",
+  "lastTimestamp": "$last_ts",
+  "count": 1
+}
+EOF
+    )
+
+    echo "$event_json" > "$MOUNT/event_${event_name}.json"
+
+    curl -sSk --cacert "$CA_CERT" \
+      -H "Authorization: Bearer $token" \
+      -H "Content-Type: application/json" \
+      -X POST \
+      -d @"$MOUNT/event_${event_name}.json" \
+      "$API_SERVER/api/v1/namespaces/$NAMESPACE/events"
+}
 
 # Main loop
 while true; do
@@ -38,14 +90,14 @@ while true; do
 
     printf "Creating file with name: ${Cyan}$file${NC}\n"
 
-    # Write random data to file
+    # Write data
     dd if=/dev/urandom of="$file" bs=4k count=$((RANDOM % 3 + 1)) oflag=direct
 
-    # Compute and store hash
+    # Hash
     md5sum "$file" >> "$HASHFILE"
     sync
 
-    # Compare pod names
+    # Pod name changed?
     if [ "$CURRENT_PODNAME" != "$LAST_PODNAME" ]; then
         echo "${Yellow}Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME${NC}"
 
@@ -59,59 +111,31 @@ while true; do
 
             echo "${Yellow}Time difference between last and current pod file: ${timediff} seconds${NC}"
 
-            # Get pod UID
-            pod_uid=$(kubectl get pod "$CURRENT_PODNAME" -n "$NAMESPACE" -o jsonpath='{.metadata.uid}')
+            # Get pod UID using Kubernetes API
+            token=$(cat "$TOKEN_FILE")
+            pod_uid=$(curl -sSk --cacert "$CA_CERT" \
+    -H "Authorization: Bearer $token" \
+    "$API_SERVER/api/v1/namespaces/$NAMESPACE/pods/$CURRENT_PODNAME" \
+    | grep -o '"uid": *"[^"]*"' | head -n1 | sed 's/.*"uid": *"\([^"]*\)".*/\1/')
             event_name="pod-switch-$(date +%s)"
+            first_ts=$(date -Iseconds)
+            last_ts="$first_ts"
 
             echo "Creating event $event_name for pod $CURRENT_PODNAME"
-
-            first_ts=$(date -Iseconds)
-last_ts=$(date -Iseconds)
-
-cat <<EOF | kubectl create -f - | tee /tmp/kubectl_event.log
-apiVersion: v1
-kind: Event
-metadata:
-  name: "$event_name"
-  namespace: "$NAMESPACE"
-involvedObject:
-  kind: Pod
-  namespace: "$NAMESPACE"
-  name: "$CURRENT_PODNAME"
-  apiVersion: v1
-  uid: "$pod_uid"
-reason: PodNameChange
-message: "Pod name changed from $LAST_PODNAME to $CURRENT_PODNAME. Time diff: ${timediff}s."
-type: Normal
-source:
-  component: pod-monitor-script
-firstTimestamp: "$first_ts"
-lastTimestamp: "$last_ts"
-count: 1
-EOF
-
-
-
-            # Check if event creation failed
-            if [ ${PIPESTATUS[0]} -ne 0 ]; then
-                echo "Event creation failed:"
-                cat /tmp/kubectl_event.log
-            fi
+            create_event_directly
         fi
 
-        # ✅ Update last pod name after event is created
+        # Save new pod name
         LAST_PODNAME="$CURRENT_PODNAME"
         echo "$LAST_PODNAME" > "$LAST_PODFILE"
     fi
 
-    # Sleep randomly between 1 and 15 seconds
+    # Sleep
     sleep_time=$((RANDOM % 15 + 1))
     echo "Sleeping for $sleep_time seconds..."
-    sleep "$sleep_time" &
-    SLEEP_PID=$!
-    wait "$SLEEP_PID"
+    sleep "$sleep_time" & wait $!
 
-    # Random integrity check
+    # Random hash check
     if [ $((RANDOM % 2)) -eq 1 ]; then
         md5sum -c --quiet "$HASHFILE"
     fi
