@@ -82,7 +82,14 @@ EOF
         fi
 
         LAST_PODNAME="$CURRENT_PODNAME"
-        echo "$LAST_PODNAME" > "$LAST_PODFILE"
+        if echo "$LAST_PODNAME" > "$LAST_PODFILE"; then
+            echo "✅ Saved LAST_PODNAME to $LAST_PODFILE"
+        else
+            echo "❌ Failed to write LAST_PODNAME to $LAST_PODFILE"
+            ls -ld "$MOUNT" "$LAST_PODFILE"
+        fi
+    else
+        echo "❌ Skipped iff check"
     fi
 
     # Sleep with interrupt support
