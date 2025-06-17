@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vm-5-pvc
+spec:
+  dataSourceRef:
+    apiGroup: cdi.kubevirt.io
+    kind: VolumeImportSource
+    name: cirros-source
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: rbd-custom-sc-using-default-pool-r3
+  volumeMode: Block
