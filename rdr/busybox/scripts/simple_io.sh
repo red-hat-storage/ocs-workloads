@@ -27,6 +27,7 @@ if [ -f "$LAST_PODFILE" ]; then
     LAST_PODNAME=$(cat "$LAST_PODFILE")
 else
     LAST_PODNAME="$CURRENT_PODNAME"
+    echo "$CURRENT_PODNAME" > "$LAST_PODFILE"  # ✅ Write it on first run
 fi
 
 # Trap to handle termination
@@ -135,7 +136,7 @@ while true; do
     echo "Sleeping for $sleep_time seconds..."
     sleep "$sleep_time" & wait $!
 
-    # Random hash check
+    # Perform random integrity check
     if [ $((RANDOM % 2)) -eq 1 ]; then
         md5sum -c --quiet "$HASHFILE"
     fi
