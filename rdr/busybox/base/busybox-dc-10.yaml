@@ -16,6 +16,7 @@ spec:
       labels:
         workload: busybox-10
     spec:
+      serviceAccountName: dr-rpo-sa
       initContainers:
       - name: init-integrity-check
         image: quay.io/ocsci/rdr-ocs-workload
