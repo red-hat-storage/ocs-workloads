@@ -118,7 +118,7 @@ while true; do
     -H "Authorization: Bearer $token" \
     "$API_SERVER/api/v1/namespaces/$NAMESPACE/pods/$CURRENT_PODNAME" \
     | grep -o '"uid": *"[^"]*"' | head -n1 | sed 's/.*"uid": *"\([^"]*\)".*/\1/')
-            event_name="pod-switch-$(date +%s)"
+            event_name="pod-switch-$(date +%s)-$RANDOM"
             first_ts=$(date -Iseconds)
             last_ts="$first_ts"
 
