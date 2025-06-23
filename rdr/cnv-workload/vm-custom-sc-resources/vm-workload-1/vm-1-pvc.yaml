@@ -13,5 +13,5 @@ spec:
   resources:
     requests:
       storage: 20Gi
-  storageClassName: ocs-storagecluster-ceph-rbd-virtualization
+  storageClassName: rbd-cnv-custom-sc-r2
   volumeMode: Block
