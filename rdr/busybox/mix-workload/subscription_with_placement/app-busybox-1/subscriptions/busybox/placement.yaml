@@ -1,0 +1,22 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  annotations:
+    cluster.open-cluster-management.io/experimental-scheduling-disable: "true"
+  name: mix-workload-busybox-placement
+  labels:
+    app: mix-workload-busybox
+spec:
+  prioritizerPolicy:
+    mode: Additive
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: 'name'
+              operator: 'In'
+              values:
+                - PLACEHOLDER
+  clusterSets:
+    - PLACEHOLDER
