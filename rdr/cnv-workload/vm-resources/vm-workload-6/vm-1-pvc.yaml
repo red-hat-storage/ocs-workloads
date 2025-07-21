@@ -13,5 +13,5 @@ spec:
   resources:
     requests:
       storage: 20Gi
-  storageClassName: rbd-custom-sc-using-default-pool-r3
+  storageClassName: sc-via-ui-compression
   volumeMode: Block
