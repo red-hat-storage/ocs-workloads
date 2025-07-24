@@ -2,7 +2,7 @@
 apiVersion: cdi.kubevirt.io/v1beta1
 kind: VolumeImportSource
 metadata:
-  name: cirros-source
+  name: cirros-source-2
 spec:
   source:
     registry:
