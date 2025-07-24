@@ -7,7 +7,7 @@ spec:
   dataSourceRef:
     apiGroup: cdi.kubevirt.io
     kind: VolumeImportSource
-    name: cirros-source
+    name: cirros-source-2
   accessModes:
     - ReadWriteMany
   resources:
