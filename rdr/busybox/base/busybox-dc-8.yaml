@@ -15,7 +15,15 @@ spec:
     metadata:
       labels:
         workload: busybox-8
+        appgroup: busybox-group
     spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            appgroup: busybox-group
       initContainers:
       - name: init-integrity-check
         image: quay.io/ocsci/rdr-ocs-workload
