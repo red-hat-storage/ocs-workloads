@@ -16,6 +16,7 @@ spec:
       labels:
         workload: busybox-10
     spec:
+      serviceAccountName: dr-rpo-sa
       initContainers:
       - name: init-integrity-check
         image: quay.io/ocsci/rdr-ocs-workload
@@ -41,6 +42,14 @@ spec:
           value: "/mnt/test/simple_io.sh"
         - name: DATA_INTEGRITY_SCRIPT
           value: "/mnt/test/simple_io_integrity_check.sh"
+        - name: KUBERNETES_POD_NAME 
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
         imagePullPolicy: IfNotPresent
         name: busybox
         volumeMounts:
