@@ -1,0 +1,7 @@
+namespace: mix-workload-busybox-1
+resources:
+- namespace.yaml
+- placement.yaml
+- subscription.yaml
+- app.yaml
+- managedclustersetbinding.yaml
