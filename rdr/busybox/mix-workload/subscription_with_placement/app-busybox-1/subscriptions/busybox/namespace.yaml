@@ -1,0 +1,7 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mix-workload-busybox-1
+  labels:
+    rdrworkload: "true"
