@@ -13,5 +13,5 @@ spec:
   resources:
     requests:
       storage: 20Gi
-  storageClassName: rbd-cnv-custom-sc-r2
+  storageClassName: rbd-cnv-custom-sc
   volumeMode: Block
