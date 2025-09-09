@@ -1,0 +1,83 @@
+apiVersion: v1                    
+kind: Namespace
+metadata:
+  name: mix-workload-busybox-1                             
+---
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: mix-workload-busybox-1
+  namespace: mix-workload-busybox-1
+spec:
+  componentKinds:
+  - group: apps.open-cluster-management.io
+    kind: Subscription
+  descriptor: {}
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values: 
+          - mix-workload-busybox-1
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ggithubcom-red-hat-storage-ocs-workloads-ns
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Channel
+metadata:
+  annotations:
+    apps.open-cluster-management.io/reconcile-rate: medium
+  name: ggithubcom-red-hat-storage-ocs-workloads
+  namespace: ggithubcom-red-hat-storage-ocs-workloads-ns
+spec:
+  type: Git
+  pathname: 'https://github.com/red-hat-storage/ocs-workloads.git'
+---
+apiVersion: apps.open-cluster-management.io/v1
+kind: Subscription
+metadata:
+  annotations:
+    apps.open-cluster-management.io/git-branch: less_workload_rbd
+    apps.open-cluster-management.io/git-path: rdr/busybox/mix-workload/deployment
+    apps.open-cluster-management.io/reconcile-option: merge
+  labels:
+    app: mix-workload-busybox-1
+  name: mix-workload-busybox-1-subscription-1
+  namespace: mix-workload-busybox-1
+spec:
+  channel: ggithubcom-red-hat-storage-ocs-workloads-ns/ggithubcom-red-hat-storage-ocs-workloads
+  placement:
+    placementRef:
+      kind: Placement
+      name: mix-workload-busybox-1-placement-1
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  labels:
+    app: mix-workload-busybox-1
+  name: mix-workload-busybox-1-placement-1
+  namespace: mix-workload-busybox-1
+spec:
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: 'name'
+              operator: 'In'
+              values: 
+                - 'ibm-baremetal3'
+  clusterSets:
+    - submariner
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  namespace: mix-workload-busybox-1
+  name: submariner
+spec:
+  clusterSet: submariner
+

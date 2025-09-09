@@ -1,0 +1,20 @@
+---
+apiVersion: ramendr.openshift.io/v1alpha1
+kind: DRPlacementControl
+metadata:
+  name: mix-workload-busybox-drpc
+  labels:
+    app: mix-workload-busybox
+spec:
+  preferredCluster: "PLACEHOLDER-C1-ClusterName"
+  drPolicyRef:
+    apiVersion: ramendr.openshift.io/v1alpha1
+    kind: DRPolicy
+    name: PLACEHOLDER-DRPOLICY-NAME
+  placementRef:
+    apiVersion: cluster.open-cluster-management.io/v1beta1
+    kind: Placement
+    name: mix-workload-busybox-placement
+  pvcSelector:
+    matchLabels:
+      appname: busybox_app1
