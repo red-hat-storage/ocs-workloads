@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- ../../base
+- ../../../base
 
 namePrefix: mix-workload-
 patches:
@@ -209,3 +209,9 @@ patches:
   target:
     kind: PersistentVolumeClaim
     name: busybox-pvc-10
+- patch: |-
+    - op: add
+      path: /metadata/labels/appname
+      value: busybox_app_mix
+  target:
+    kind: PersistentVolumeClaim
