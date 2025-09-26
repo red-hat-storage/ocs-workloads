@@ -1,0 +1,66 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-workload-2
+spec:
+  running: true
+  template:
+    metadata:
+      annotations:
+        vm.kubevirt.io/flavor: small
+        vm.kubevirt.io/os: fedora
+        vm.kubevirt.io/workload: server
+      labels:
+        kubevirt.io/size: small
+    spec:
+      domain:
+        cpu:
+          cores: 1
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+            - name: cloudinit
+              disk: {}
+          interfaces:
+            - name: default
+              masquerade: {}
+              model: virtio
+          networkInterfaceMultiqueue: true
+          rng: {}
+        features:
+          acpi: {}
+        machine:
+          type: pc-q35-rhel8.6.0
+        resources:
+          requests:
+            # Match cirros-source memory requirements.
+            # See https://github.com/cirros-dev/cirros/issues/53
+            memory: 256Mi
+      evictionStrategy: LiveMigrate
+      networks:
+        - name: default
+          pod: {}
+      terminationGracePeriodSeconds: 180
+      accessCredentials:
+        - sshPublicKey:
+            source:
+              secret:
+                secretName: vm-secret-1
+            propagationMethod:
+              configDrive: {}
+      volumes:
+        - name: rootdisk
+          persistentVolumeClaim:
+            claimName: vm-3-pvc
+        - name: cloudinit
+          cloudInitConfigDrive:
+            userData: |-
+              #user-config
+              user: cirros
+              password: gocubsgo
+              chpasswd: { expire: False }
