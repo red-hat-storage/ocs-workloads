@@ -72,9 +72,9 @@ jobs:
         id: set_tags
         run: |
           PR_TAG="pr-${{ github.event.pull_request.number }}"
-          BASE_TAG="${{ github.base_ref }}"
-          echo "tags=${PR_TAG},${BASE_TAG} " >> $GITHUB_OUTPUT
-          echo "🧾 Using tags: ${PR_TAG},${BASE_TAG} "
+          BASE_TAG="$(echo "${{ github.base_ref }}" | tr '/' '-')"
+          echo "tags=${PR_TAG} ${BASE_TAG}" >> $GITHUB_OUTPUT
+          echo "🧾 Using tags: ${PR_TAG} ${BASE_TAG}"
 
       # Build Image
       - name: Buildah Build
@@ -83,7 +83,7 @@ jobs:
         with:
           image: rdr-ocs-workload
           tags: ${{ steps.set_tags.outputs.tags }}
-          platforms: llinux/386, linux/amd64, linux/arm/v6, linux/arm/v7, linux/arm64/v8, linux/ppc64le, linux/s390x
+          platforms: linux/amd64,linux/arm64
           containerfiles: |
             ./rdr/container_image/Dockerfile
 
