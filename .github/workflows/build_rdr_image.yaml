@@ -85,7 +85,7 @@ jobs:
           tags: ${{ steps.set_tags.outputs.tags }}
           platforms: llinux/386, linux/amd64, linux/arm/v6, linux/arm/v7, linux/arm64/v8, linux/ppc64le, linux/s390x
           containerfiles: |
-            ./Dockerfile
+            ./rdr/container_image/Dockerfile
 
       # Push Image to Quay.io
       - name: Push to Quay.io
