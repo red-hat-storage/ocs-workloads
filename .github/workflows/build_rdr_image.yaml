@@ -39,17 +39,20 @@ jobs:
             echo "🛑 No Dockerfile changes detected."
           fi
 
-      # Skip build if not forced and no Dockerfile change
-      - name: Skip build if not forced and no Dockerfile change
-        if: |
-          github.event.label.name == 'build_image' && env.dockerfile_changed != 'true'
+      # 🧱 Skip build if not forced and no Dockerfile change
+      - name: Check whether to skip build
+        id: skip_check
         run: |
-          echo "⏭️ Skipping build: 'build_image' label added but no Dockerfile changes found."
-          echo "skip_build=true" >> $GITHUB_ENV
+          if [ "${{ github.event.label.name }}" = "build_image" ] && [ "${{ env.dockerfile_changed }}" != "true" ]; then
+            echo "⏭️ Skipping build: No Dockerfile changes detected."
+            echo "skip_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_build=false" >> $GITHUB_OUTPUT
+          fi
 
-      # Comment on PR when skipped
+      # 💬 Comment on PR when skipped
       - name: Comment on PR (Skipped)
-        if: env.skip_build == 'true'
+        if: steps.skip_check.outputs.skip_build == 'true'
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -58,10 +61,12 @@ jobs:
             No Dockerfile changes were detected in this PR.
             Label: `${{ github.event.label.name }}`
 
-      # Stop early if skipped
-      - name: Stop Job
-        if: env.skip_build == 'true'
-        run: exit 0
+      # 🛑 Stop Job Early if Skipped
+      - name: Stop further steps
+        if: steps.skip_check.outputs.skip_build == 'true'
+        run: |
+          echo "🛑 Exiting early since build is skipped."
+          exit 0
 
       # Set up QEMU
       - name: Set up QEMU
