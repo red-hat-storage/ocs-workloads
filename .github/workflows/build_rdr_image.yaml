@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY_USER: ${{ secrets.QUAY_USER }}
-  IMAGE_REGISTRY: quay.io/
+  IMAGE_REGISTRY: quay.io/ocsci
   REGISTRY_PASSWORD: ${{ secrets.QUAY_SECRET }}
 
 jobs:
@@ -109,9 +109,9 @@ jobs:
             Label: `${{ github.event.label.name }}`
             🏷️ Image tags: `${{ steps.set_tags.outputs.tags }}`
 
-      # 🧹 Remove trigger label so it can be reused
-      - name: Remove trigger label
-        uses: actions-ecosystem/action-remove-labels@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: ${{ github.event.label.name }}
+      # # 🧹 Remove trigger label so it can be reused
+      # - name: Remove trigger label
+      #   uses: actions-ecosystem/action-remove-labels@v1
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     labels: ${{ github.event.label.name }}
