@@ -73,8 +73,8 @@ jobs:
         run: |
           PR_TAG="pr-${{ github.event.pull_request.number }}"
           BASE_TAG="${{ github.base_ref }}"
-          echo "tags=${PR_TAG},${BASE_TAG}" >> $GITHUB_OUTPUT
-          echo "🧾 Using tags: ${PR_TAG},${BASE_TAG}"
+          echo "tags=${PR_TAG},${BASE_TAG} " >> $GITHUB_OUTPUT
+          echo "🧾 Using tags: ${PR_TAG},${BASE_TAG} "
 
       # Build Image
       - name: Buildah Build
