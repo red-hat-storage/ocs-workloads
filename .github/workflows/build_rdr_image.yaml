@@ -76,43 +76,42 @@ jobs:
           echo "tags=${PR_TAG} ${BASE_TAG}" >> $GITHUB_OUTPUT
           echo "🧾 Using tags: ${PR_TAG} ${BASE_TAG}"
 
-      # # Build Image
-      # - name: Buildah Build
-      #   id: build-image
-      #   uses: redhat-actions/buildah-build@v2
-      #   with:
-      #     image: rdr-ocs-workload
-      #     tags: ${{ steps.set_tags.outputs.tags }}
-      #     # platforms: linux/amd64,linux/arm64
-      #     platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
-      #     containerfiles: |
-      #       ./rdr/container_image/Dockerfile
+      # Build Image
+      - name: Buildah Build
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: rdr-ocs-workload
+          tags: ${{ steps.set_tags.outputs.tags }}
+          # platforms: linux/amd64,linux/arm64
+          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
+          containerfiles: |
+            ./rdr/container_image/Dockerfile
 
-      # # Push Image to Quay.io
-      # - name: Push to Quay.io
-      #   id: push-to-quay
-      #   uses: redhat-actions/push-to-registry@v2
-      #   with:
-      #     image: ${{ steps.build-image.outputs.image }}
-      #     tags: ${{ steps.build-image.outputs.tags }}
-      #     username: ${{ env.REGISTRY_USER }}
-      #     password: ${{ env.REGISTRY_PASSWORD }}
-      #     registry: ${{ env.IMAGE_REGISTRY }}
+      # Push Image to Quay.io
+      - name: Push to Quay.io
+        id: push-to-quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+          registry: ${{ env.IMAGE_REGISTRY }}
 
-      # # Comment on PR for Build Success
-      # - name: Comment on PR (Build Success)
-      #   uses: peter-evans/create-or-update-comment@v4
-      #   with:
-      #     issue-number: ${{ github.event.pull_request.number }}
-      #     body: |
-      #       ✅ **Image Build Complete**
-      #       The container image was built and pushed successfully for branch `${{ github.head_ref }}`  
-      #       Label: `${{ github.event.label.name }}`
-      #       🏷️ Image tags: `${{ steps.set_tags.outputs.tags }}`
+      # Comment on PR for Build Success
+      - name: Comment on PR (Build Success)
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ✅ **Image Build Complete**
+            The container image was built and pushed successfully for branch `${{ github.head_ref }}`  
+            Label: `${{ github.event.label.name }}`
+            🏷️ Image tags: `${{ steps.set_tags.outputs.tags }}`
 
       # 🧹 Remove trigger label so it can be reused
       - name: Remove trigger label
         uses: actions-ecosystem/action-remove-labels@v1.3.0
         with:
-          # github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: ${{ github.event.label.name }}
