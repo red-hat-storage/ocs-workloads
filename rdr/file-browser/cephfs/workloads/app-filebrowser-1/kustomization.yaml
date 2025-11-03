@@ -1,0 +1,13 @@
+resources:
+- ../../../base
+patches:
+  - target:
+      kind: PersistentVolumeClaim
+      labelSelector: appname=firebrowser_app1
+    patch: |-
+      - op: replace
+        path: /spec/accessModes/0
+        value: ReadWriteMany
+      - op: replace
+        path: /spec/storageClassName
+        value: ocs-storagecluster-cephfs
