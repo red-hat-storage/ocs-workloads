@@ -1,0 +1,24 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: filebrowser
+  labels:
+    app: filebrowser
+    app.kubernetes.io/component: filebrowser
+    app.kubernetes.io/instance: filebrowser
+    app.kubernetes.io/name: filebrowser
+    app.openshift.io/runtime-version: latest
+    argocd.argoproj.io/instance: filebrowser
+  annotations:
+    haproxy.router.openshift.io/balance: roundrobin
+    haproxy.router.openshift.io/disable_cookies: 'true'
+spec:
+  to:
+    kind: Service
+    name: filebrowser
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  tls:
+    termination: edge
+  wildcardPolicy: None
