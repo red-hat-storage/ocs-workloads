@@ -12,4 +12,4 @@ data:
   UPLOAD_DELAY_SEC: "15"
   CLEAN_TMP: "true"
   DEBUG: "true"
-  ITERATIONS: "0"
+  ITERATIONS: "0"   # 0 = infinite, -1 = pause, >0 = finite
