@@ -10,6 +10,6 @@ data:
   MIN_FILE_MB: "1"
   MAX_FILE_MB: "3"
   UPLOAD_DELAY_SEC: "15"
-  CLEAN_TMP: "true"
-  DEBUG: "true"
+  CLEAN_TMP: "false"
+  DEBUG: "false"
   ITERATIONS: "0"   # 0 = infinite, -1 = pause, >0 = finite
