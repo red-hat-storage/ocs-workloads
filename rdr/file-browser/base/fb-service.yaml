@@ -8,6 +8,7 @@ metadata:
     app.kubernetes.io/instance: filebrowser
     app.kubernetes.io/name: filebrowser
     app.openshift.io/runtime-version: latest
+    workloadpattern: filebrowser_io
 spec:
   ports:
     - name: 8080-tcp

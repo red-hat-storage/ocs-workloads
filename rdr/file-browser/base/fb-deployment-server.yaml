@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/instance: filebrowser
     app.kubernetes.io/name: filebrowser
     app.openshift.io/runtime: go
+    workloadpattern: filebrowser_io
 spec:
   replicas: 1
   selector:
