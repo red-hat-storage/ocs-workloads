@@ -22,7 +22,7 @@ spec:
       containers:
       - name: mysql
         image: quay.io/prsurve/mysql_data_write:latest
-        command: ['/usr/bin/python3', '/script/db.py']
+        command: ['/usr/local/bin/python3', '/script/db.py']
         imagePullPolicy: Always
         env:
          - name: MYSQL_DB_HOST
