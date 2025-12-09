@@ -48,6 +48,10 @@ spec:
           value: "/mnt/test/simple_io.sh"
         - name: DATA_INTEGRITY_SCRIPT
           value: "/mnt/test/simple_io_integrity_check.sh"
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         imagePullPolicy: IfNotPresent
         name: busybox
         volumeMounts:
