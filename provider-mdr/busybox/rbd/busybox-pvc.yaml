@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-rbd-pvc
+  labels:
+    appname: busybox-rbd-offload
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: test-vr-offloading-sc
+  resources:
+    requests:
+      storage: 5Gi
