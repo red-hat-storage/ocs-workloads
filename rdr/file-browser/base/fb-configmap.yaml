@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: uploader-config
+  labels:
+    workloadpattern: filebrowser_io
+data:
+  FB_USERNAME: "admin"
+  FB_PASSWORD: "admin123"
+  UPLOAD_MINUTES: "10"
+  COOLDOWN_MINUTES: "5"
+  MIN_FILE_MB: "1"
+  MAX_FILE_MB: "3"
+  UPLOAD_DELAY_SEC: "15"
+  CLEAN_TMP: "false"
+  DEBUG: "false"
+  ITERATIONS: "0"   # 0 = infinite, -1 = pause, >0 = finite

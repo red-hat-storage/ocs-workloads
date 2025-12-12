@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    appname: firebrowser_app1
+    workloadpattern: filebrowser_io_pvc
+  name: filebrowser-pvc-1
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 94Gi
+  storageClassName: ocs-storagecluster-ceph-rbd
