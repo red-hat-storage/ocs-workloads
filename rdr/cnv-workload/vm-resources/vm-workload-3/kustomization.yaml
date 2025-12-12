@@ -1,0 +1,9 @@
+---
+resources:
+  - vm-3-source.yaml
+  - vm-3-pvc.yaml
+  - vm-workload-3.yaml
+commonLabels:
+  appname: kubevirt
+generatorOptions:
+  disableNameSuffixHash: true
