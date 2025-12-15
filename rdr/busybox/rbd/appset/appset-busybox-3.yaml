@@ -20,7 +20,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads.git
-        targetRevision: master
+        targetRevision: release-4.20
         path: rdr/busybox/rbd/workloads/app-busybox-3
       destination:
         namespace: appset-busybox-3
