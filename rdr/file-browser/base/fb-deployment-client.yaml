@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebrowser-client
+  labels:
+    workloadpattern: filebrowser_io
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebrowser-client
+  template:
+    metadata:
+      labels:
+        app: filebrowser-client
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: fb-client
+        image: quay.io/prsurve/filebrowser_data_write:latest
+        imagePullPolicy: Always
+        env:
+        - name: CONFIG_PATH
+          value: "/config"
+        volumeMounts:
+        - name: uploader-config
+          mountPath: /config
+      volumes:
+      - name: uploader-config
+        configMap:
+          name: uploader-config

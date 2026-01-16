@@ -1,0 +1,24 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: filebrowser
+  labels:
+    app: filebrowser
+    app.kubernetes.io/component: filebrowser
+    app.kubernetes.io/instance: filebrowser
+    app.kubernetes.io/name: filebrowser
+    app.openshift.io/runtime-version: latest
+    workloadpattern: filebrowser_io
+spec:
+  ports:
+    - name: 8080-tcp
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  internalTrafficPolicy: Cluster
+  type: ClusterIP
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app: filebrowser
+    deployment: filebrowser
