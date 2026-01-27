@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: filebrowser
-          image: 'quay.io/ocsci/filebrowser:latest'
+          image: 'quay.io/ocsci/filebrowser:v1.0.test'
           ports:
             - containerPort: 8080
               protocol: TCP

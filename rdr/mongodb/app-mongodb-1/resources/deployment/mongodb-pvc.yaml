@@ -6,7 +6,7 @@ metadata:
     appname: mongodb
 spec:
   accessModes:
-    - ReadWriteOnce 
+    - ReadWriteOnce
   storageClassName: ocs-storagecluster-ceph-rbd
   resources:
     requests:

@@ -9,8 +9,8 @@ metadata:
     app: mix-workload-busybox
   name: mix-workload-busybox-sub
 spec:
-    channel: ramen-mix-workload-busybox-1/ramen-gitops
-    placement:
-      placementRef:
-        kind: Placement
-        name: mix-workload-busybox-placement
+  channel: ramen-mix-workload-busybox-1/ramen-gitops
+  placement:
+    placementRef:
+      kind: Placement
+      name: mix-workload-busybox-placement

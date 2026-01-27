@@ -8,7 +8,7 @@ metadata:
     workloadpattern: mysql_io_pvc
 spec:
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   storageClassName: ocs-storagecluster-ceph-rbd
   resources:
     requests:

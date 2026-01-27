@@ -4,12 +4,12 @@ metadata:
   name: busybox-5
 spec:
   componentKinds:
-  - group: apps.open-cluster-management.io
-    kind: Subscription
+    - group: apps.open-cluster-management.io
+      kind: Subscription
   descriptor: {}
   selector:
     matchExpressions:
-    - key: app
-      operator: In
-      values:
-      - busybox-sample
+      - key: app
+        operator: In
+        values:
+          - busybox-sample

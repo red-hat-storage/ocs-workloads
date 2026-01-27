@@ -1,9 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- fb-configmap.yaml
-- fb-deployment-client.yaml
-- fb-deployment-server.yaml
-- fb-route.yaml
-- fb-service.yaml
-- filebrowser-pvc.yaml
+  - fb-configmap.yaml
+  - fb-deployment-client.yaml
+  - fb-deployment-server.yaml
+  - fb-route.yaml
+  - fb-service.yaml
+  - filebrowser-pvc.yaml

@@ -17,52 +17,50 @@ spec:
         workload: mysql
     spec:
       containers:
-      - image: quay.io/prsurve/mysql:latest
-        name: mysql
-        livenessProbe:
-          exec:
-            command:
-            - sh
-            - -c
-            - mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD}
-          failureThreshold: 10
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 10
-        readinessProbe:
-          exec:
-            command:
-            - sh
-            - -c
-            - mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD}
-          failureThreshold: 10
-          initialDelaySeconds: 30
-          periodSeconds: 5
-          successThreshold: 1
-          timeoutSeconds: 1
-        env:
-        # Use secret in real usage
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mysqlsecret
-              key: mysqlrootpass
-        ports:
-        - containerPort: 3306
+        - image: quay.io/prsurve/mysql:v1.0.test
           name: mysql
-        volumeMounts:
-        - name: mysql-persistent-storage
-          mountPath: /var/lib/mysql
-        - name: mysql-initdb
-          mountPath: /docker-entrypoint-initdb.d/
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD}
+            failureThreshold: 10
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h localhost -uroot -p${MYSQL_ROOT_PASSWORD}
+            failureThreshold: 10
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            # Use secret in real usage
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysqlsecret
+                  key: mysqlrootpass
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+            - name: mysql-initdb
+              mountPath: /docker-entrypoint-initdb.d/
       volumes:
-      - name: mysql-persistent-storage
-        persistentVolumeClaim:
-          claimName: mysql-pv-claim
-          readOnly: false
-      - name: mysql-initdb
-        configMap:
-          name: mysql-initdb
-
-
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim
+            readOnly: false
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb

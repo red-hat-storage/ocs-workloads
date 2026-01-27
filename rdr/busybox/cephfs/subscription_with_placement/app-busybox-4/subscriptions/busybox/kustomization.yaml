@@ -1,7 +1,7 @@
 namespace: busybox-workloads-cephfs-4
 resources:
-- namespace.yaml
-- placement.yaml
-- subscription.yaml
-- app.yaml
-- managedclustersetbinding.yaml
+  - namespace.yaml
+  - placement.yaml
+  - subscription.yaml
+  - app.yaml
+  - managedclustersetbinding.yaml

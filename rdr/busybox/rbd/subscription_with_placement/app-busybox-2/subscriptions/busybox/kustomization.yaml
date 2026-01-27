@@ -1,7 +1,7 @@
 namespace: busybox-workloads-2
 resources:
-- namespace.yaml
-- placement.yaml
-- subscription.yaml
-- app.yaml
-- managedclustersetbinding.yaml
+  - namespace.yaml
+  - placement.yaml
+  - subscription.yaml
+  - app.yaml
+  - managedclustersetbinding.yaml

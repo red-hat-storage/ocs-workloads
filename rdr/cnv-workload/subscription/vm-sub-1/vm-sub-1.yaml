@@ -24,8 +24,8 @@ metadata:
   namespace: vm-sub-1
 spec:
   componentKinds:
-  - group: apps.open-cluster-management.io
-    kind: Subscription
+    - group: apps.open-cluster-management.io
+      kind: Subscription
   descriptor: {}
   selector:
     matchExpressions:

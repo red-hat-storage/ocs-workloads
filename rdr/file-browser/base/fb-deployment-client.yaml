@@ -16,16 +16,16 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       containers:
-      - name: fb-client
-        image: quay.io/prsurve/filebrowser_data_write:latest
-        imagePullPolicy: Always
-        env:
-        - name: CONFIG_PATH
-          value: "/config"
-        volumeMounts:
-        - name: uploader-config
-          mountPath: /config
+        - name: fb-client
+          image: quay.io/prsurve/filebrowser_data_write:v1.0.test
+          imagePullPolicy: Always
+          env:
+            - name: CONFIG_PATH
+              value: "/config"
+          volumeMounts:
+            - name: uploader-config
+              mountPath: /config
       volumes:
-      - name: uploader-config
-        configMap:
-          name: uploader-config
+        - name: uploader-config
+          configMap:
+            name: uploader-config

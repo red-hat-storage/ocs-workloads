@@ -3,10 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: mongo-data
   labels:
-    appname: mongodb 
+    appname: mongodb
 spec:
   accessModes:
-    - ReadWriteMany 
+    - ReadWriteMany
   storageClassName: ocs-storagecluster-cephfs
   resources:
     requests:
