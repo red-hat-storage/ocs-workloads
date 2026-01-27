@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: vm-appset-pull-1
+  name: vm-appset-push-1
   namespace: openshift-gitops
 spec:
   generators:
@@ -9,11 +9,11 @@ spec:
         configMapRef: acm-placement
         labelSelector:
           matchLabels:
-            cluster.open-cluster-management.io/placement: vm-appset-pull-1-placement
+            cluster.open-cluster-management.io/placement: vm-appset-push-1-placement
         requeueAfterSeconds: 180
   template:
     metadata:
-      name: vm-appset-pull-1-{{name}}
+      name: vm-appset-push-1-{{name}}
       labels:
         velero.io/exclude-from-backup: "true"
     spec:
@@ -21,9 +21,9 @@ spec:
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads
         targetRevision: master
-        path: rdr/cnv-workload/vm-resources/vm-workload-1
+        path: rdr/cnv-workload/vm-pvc/vm-resources/vm-workload-1
       destination:
-        namespace: vm-appset-pull-1
+        namespace: vm-appset-push-1
         server: "{{server}}"
       syncPolicy:
         automated:
@@ -36,7 +36,7 @@ spec:
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: vm-appset-pull-1-placement
+  name: vm-appset-push-1-placement
   namespace: openshift-gitops
 spec:
   predicates:
