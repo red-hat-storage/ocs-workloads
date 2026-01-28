@@ -42,7 +42,7 @@ spec:
       volumes:
       - name: root-disk
         persistentVolumeClaim:
-          claimName: root-disk
+          claimName: root-disk-vm-dv
       - cloudInitConfigDrive:
           userData: |
             #!/bin/sh

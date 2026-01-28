@@ -12,7 +12,7 @@ spec:
         cdi.kubevirt.io/storage.checkStaticVolume: "true"
       labels:
         appname: vm-dvt-workload-1
-      name: root-disk
+      name: root-disk-vm-dvt
     spec:
       source:
         registry:
@@ -37,7 +37,7 @@ spec:
             configDrive: {}
           source:
             secret:
-              secretName: my-public-key
+              secretName: vm-secret-1
       domain:
         devices:
           disks:
@@ -60,7 +60,7 @@ spec:
       volumes:
       - name: root-disk
         persistentVolumeClaim:
-          claimName: root-disk
+          claimName: root-disk-vm-dvt
       - cloudInitConfigDrive:
           userData: |
             #!/bin/sh
