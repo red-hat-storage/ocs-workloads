@@ -11,7 +11,7 @@ spec:
       annotations:
         cdi.kubevirt.io/storage.checkStaticVolume: "true"
       labels:
-        appname: vm-dvt-workload-1
+        appname: kubevirt
       name: root-disk-vm-dvt
     spec:
       source:
