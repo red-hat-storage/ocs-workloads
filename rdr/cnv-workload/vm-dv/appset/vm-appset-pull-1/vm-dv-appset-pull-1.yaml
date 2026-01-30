@@ -20,7 +20,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads
-        targetRevision: add_dv_dvt_vms
+        targetRevision: master
         path: rdr/cnv-workload/vm-dv/vm-resources/vm-workload-1
       destination:
         namespace: vm-dv-appset-pull-1
