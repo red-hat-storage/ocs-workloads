@@ -1,0 +1,68 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    appname: vm-dvt-workload-1
+  name: vm-dvt-workload-1
+spec:
+  dataVolumeTemplates:
+  - metadata:
+      annotations:
+        cdi.kubevirt.io/storage.checkStaticVolume: "true"
+      labels:
+        appname: kubevirt
+      name: root-disk-vm-dvt
+    spec:
+      source:
+        registry:
+          url: docker://quay.io/ocsci/cirros-dd:0.6.3
+      storage:
+        accessModes:
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 20Gi
+        storageClassName: ocs-storagecluster-ceph-rbd-virtualization
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/domain: vm
+        kubevirt.io/size: small
+    spec:
+      accessCredentials:
+      - sshPublicKey:
+          propagationMethod:
+            configDrive: {}
+          source:
+            secret:
+              secretName: vm-secret-1
+      domain:
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: root-disk
+          - disk:
+              bus: virtio
+            name: cloud-init
+          interfaces:
+          - masquerade: {}
+            model: virtio
+            name: default
+        resources:
+          requests:
+            memory: 256Mi
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: root-disk
+        persistentVolumeClaim:
+          claimName: root-disk-vm-dvt
+      - cloudInitConfigDrive:
+          userData: |
+            #!/bin/sh
+            echo "Running user-data script"
+        name: cloud-init
