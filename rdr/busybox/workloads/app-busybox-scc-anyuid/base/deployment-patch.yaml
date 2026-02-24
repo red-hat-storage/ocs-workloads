@@ -7,6 +7,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -25,6 +27,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -43,6 +47,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -61,6 +67,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -79,6 +87,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -97,6 +107,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -115,6 +127,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -133,6 +147,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -151,6 +167,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
@@ -169,6 +187,8 @@ spec:
   template:
     spec:
       serviceAccountName: busybox-scc-sa
+      securityContext:
+        fsGroup: 1000
       containers:
       - name: busybox
         securityContext:
