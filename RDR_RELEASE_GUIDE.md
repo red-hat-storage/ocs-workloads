@@ -317,6 +317,22 @@ The script provides colored output:
   ./create_rdr_release.sh -b release-4.17
   ```
 
+### "Cannot use 'master' or 'main' as release branch name"
+- You tried to use a reserved branch name
+- `master` and `main` are reserved for main development branches
+- Use a semantic release name instead: `release-4.17`, `release-4.18`, etc.
+
+### "Cannot use 'latest' as release branch/tag name"
+- You tried to use `latest` as a release name
+- `latest` is the tag being replaced, not a valid release identifier
+- Use a semantic version name: `release-4.17`, `release-4.18`, etc.
+
+### "Branch/Tag name must start with 'release-'"
+- You used a name that doesn't start with `release-`
+- Examples: `v4.17`, `4.17`, `stable-2024`
+- **Solution**: Add `release-` prefix: `release-4.17`, `release-4.18`, etc.
+- This is a strict requirement to maintain consistency
+
 ## Best Practices
 
 1. **Always use dry-run first**: `./create_rdr_release.sh -b BRANCH_NAME -d`
@@ -324,6 +340,47 @@ The script provides colored output:
 3. **Commit your work first**: Ensure you have no uncommitted changes before running
 4. **Review before pushing**: Use `git diff` to review changes before pushing to remote
 5. **Coordinate with team**: Ensure your container images are built and pushed with the correct tag before creating the release branch
+
+## Important Restrictions
+
+To prevent common mistakes, the scripts **strictly validate** release names:
+
+**📋 Naming Requirements:**
+- ✅ **MUST** start with `release-`
+- ✅ Follow the pattern: `release-X.XX` or `release-X.X`
+
+**❌ Invalid names (will be rejected):**
+- `master` or `main` - Reserved for main development branches
+- `latest` - Reserved as the tag being replaced
+- `v4.17` - Doesn't start with "release-"
+- `stable-2024` - Doesn't start with "release-"
+- `4.17` - Doesn't start with "release-"
+
+**✅ Valid release names:**
+- `release-4.17` ✓
+- `release-4.18` ✓
+- `release-5.0` ✓
+- `release-4.17.1` ✓
+
+**Example of validation:**
+```bash
+# Invalid: doesn't start with "release-"
+$ ./create_rdr_release.sh -b v4.17
+[ERROR] Branch name must start with 'release-'
+[INFO] Current value: v4.17
+[INFO] Valid examples: release-4.17, release-4.18, release-5.0, etc.
+
+# Invalid: reserved name
+$ ./create_rdr_release.sh -b latest
+[ERROR] Cannot use 'latest' as release branch name!
+[INFO] 'latest' is the tag being replaced, not a valid release name.
+[INFO] Use a semantic release name like: release-4.17, release-4.18, etc.
+
+# Valid: starts with "release-"
+$ ./create_rdr_release.sh -b release-4.17
+[INFO] Starting RDR release process for branch: release-4.17
+✓ Validation passed
+```
 
 ## Summary of Changes
 

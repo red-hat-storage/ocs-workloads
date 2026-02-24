@@ -93,6 +93,29 @@ if [[ -z "$BRANCH_NAME" ]]; then
     usage
 fi
 
+# Prevent using reserved names
+if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" ]]; then
+    print_error "Cannot use 'master' or 'main' as release branch name!"
+    print_info "These are reserved for the main development branches."
+    print_info "Use a release branch name like: release-4.17, release-4.18, etc."
+    exit 1
+fi
+
+if [[ "$BRANCH_NAME" == "latest" ]]; then
+    print_error "Cannot use 'latest' as release branch name!"
+    print_info "'latest' is the tag being replaced, not a valid release name."
+    print_info "Use a semantic release name like: release-4.17, release-4.18, etc."
+    exit 1
+fi
+
+# Enforce that branch name must start with "release-"
+if [[ ! "$BRANCH_NAME" =~ ^release- ]]; then
+    print_error "Branch name must start with 'release-'"
+    print_info "Current value: $BRANCH_NAME"
+    print_info "Valid examples: release-4.17, release-4.18, release-5.0, etc."
+    exit 1
+fi
+
 # Check if we're in a git repository
 if ! git rev-parse --git-dir > /dev/null 2>&1; then
     print_error "Not in a git repository!"

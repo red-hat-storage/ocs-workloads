@@ -61,6 +61,21 @@ The following **8 container images** are used in the `rdr/` workloads and must b
 
 ---
 
+## Important: Release Naming Convention
+
+**All release tags MUST start with `release-`**
+
+Examples:
+- ✅ `release-4.17`
+- ✅ `release-4.18`
+- ✅ `release-5.0`
+- ❌ `v4.17` (invalid)
+- ❌ `4.17` (invalid)
+
+This is enforced by the `tag_images.sh` script.
+
+---
+
 ## Quick Reference Checklist
 
 For release **release-4.17**, tag and push these images:

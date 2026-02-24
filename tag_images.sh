@@ -104,6 +104,29 @@ if [[ -z "$RELEASE_TAG" ]]; then
     usage
 fi
 
+# Prevent using reserved names
+if [[ "$RELEASE_TAG" == "latest" ]]; then
+    print_error "Cannot use 'latest' as release tag!"
+    print_info "'latest' is the tag being replaced, not a valid release name."
+    print_info "Use a semantic release tag like: release-4.17, release-4.18, etc."
+    exit 1
+fi
+
+if [[ "$RELEASE_TAG" == "master" || "$RELEASE_TAG" == "main" ]]; then
+    print_error "Cannot use 'master' or 'main' as release tag!"
+    print_info "These are reserved for main development branches."
+    print_info "Use a release tag name like: release-4.17, release-4.18, etc."
+    exit 1
+fi
+
+# Enforce that release tag must start with "release-"
+if [[ ! "$RELEASE_TAG" =~ ^release- ]]; then
+    print_error "Release tag must start with 'release-'"
+    print_info "Current value: $RELEASE_TAG"
+    print_info "Valid examples: release-4.17, release-4.18, release-5.0, etc."
+    exit 1
+fi
+
 # Validate method
 if [[ "$METHOD" != "docker" && "$METHOD" != "podman" && "$METHOD" != "skopeo" ]]; then
     print_error "Invalid method: $METHOD. Must be docker, podman, or skopeo"

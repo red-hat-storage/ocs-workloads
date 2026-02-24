@@ -135,6 +135,39 @@ sudo apt install skopeo
 4. **Use semantic naming** - Follow the pattern `release-X.XX`
 5. **Coordinate with team** - Ensure everyone is aware of the release
 
+## Important Restrictions
+
+The scripts **strictly enforce** naming requirements to prevent mistakes:
+
+**📋 Naming Rule:**
+- ✅ **ALL** release names **MUST** start with `release-`
+- ✅ Follow pattern: `release-X.XX` or `release-X.X`
+
+**❌ Invalid names (will be rejected):**
+- `master`, `main` - Reserved for main branches
+- `latest` - Reserved as the tag being replaced
+- `v4.17` - Doesn't start with "release-"
+- `4.17` - Doesn't start with "release-"
+- Any name not starting with "release-"
+
+**✅ Valid release names:**
+- `release-4.17` ✓
+- `release-4.18` ✓
+- `release-5.0` ✓
+
+**Validation Examples:**
+```bash
+# ❌ Invalid
+./create_rdr_release.sh -b v4.17      # Error: must start with 'release-'
+./tag_images.sh -t latest             # Error: reserved name
+
+# ✅ Valid
+./create_rdr_release.sh -b release-4.17   # OK
+./tag_images.sh -t release-4.17           # OK
+```
+
+The scripts will stop immediately with a clear error if you use an invalid name.
+
 ## Quick Help
 
 ```bash
