@@ -2,7 +2,6 @@ resources:
 - ../../../base
 - serviceaccount.yaml
 
-
 patches:
 - path: deployment-patch.yaml
 
