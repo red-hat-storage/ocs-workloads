@@ -1,0 +1,7 @@
+resources:
+- ../../base
+
+commonLabels:
+  storage-type: "rbd"
+
+# RBD uses default storage class from base (ocs-storagecluster-ceph-rbd)

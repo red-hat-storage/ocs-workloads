@@ -1,0 +1,16 @@
+resources:
+- ../../base
+
+patches:
+- target:
+    kind: PersistentVolumeClaim
+  patch: |-
+    - op: replace
+      path: /spec/accessModes/0
+      value: ReadWriteMany
+    - op: replace
+      path: /spec/storageClassName
+      value: ocs-storagecluster-cephfs
+
+commonLabels:
+  storage-type: "cephfs"
