@@ -20,7 +20,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads
-        targetRevision: master
+        targetRevision: dryrun-4.17
         path: rdr/cnv-workload/vm-dvt/vm-resources/vm-workload-1
       destination:
         namespace: vm-dvt-appset-push-1

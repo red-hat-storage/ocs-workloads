@@ -17,7 +17,7 @@ spec:
         workload: mysql
     spec:
       containers:
-      - image: quay.io/prsurve/mysql:latest
+      - image: quay.io/prsurve/mysql:dryrun-4.17
         name: mysql
         livenessProbe:
           exec:
