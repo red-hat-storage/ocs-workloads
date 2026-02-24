@@ -128,20 +128,28 @@ update_file() {
     local dry_run=$3
 
     # Check for image tags
-    local has_image_tags
-    has_image_tags=$(grep -c "image:.*:latest" "$file" 2>/dev/null || echo "0")
+    local has_image_tags=0
+    if grep -q "image:.*:latest" "$file" 2>/dev/null; then
+        has_image_tags=1
+    fi
 
     # Check for targetRevision: master
-    local has_target_revision
-    has_target_revision=$(grep -c "targetRevision: master" "$file" 2>/dev/null || echo "0")
+    local has_target_revision=0
+    if grep -q "targetRevision: master" "$file" 2>/dev/null; then
+        has_target_revision=1
+    fi
 
     # Check for git-branch: master or github-branch: master
-    local has_git_branch
-    has_git_branch=$(grep -c "git-branch: master\|github-branch: master" "$file" 2>/dev/null || echo "0")
+    local has_git_branch=0
+    if grep -q -E "git-branch: master|github-branch: master" "$file" 2>/dev/null; then
+        has_git_branch=1
+    fi
 
     # Check for GitHub raw URLs with master branch
-    local has_github_url
-    has_github_url=$(grep -c "raw.githubusercontent.com/red-hat-storage/ocs-workloads/master" "$file" 2>/dev/null || echo "0")
+    local has_github_url=0
+    if grep -q "raw.githubusercontent.com/red-hat-storage/ocs-workloads/master" "$file" 2>/dev/null; then
+        has_github_url=1
+    fi
 
     # Skip if no changes needed
     if [[ "$has_image_tags" -eq 0 && "$has_target_revision" -eq 0 && "$has_git_branch" -eq 0 && "$has_github_url" -eq 0 ]]; then
@@ -154,7 +162,7 @@ update_file() {
         print_warning "DRY RUN - Would update:"
 
         # Show image tag changes
-        if [[ "$has_image_tags" -gt 0 ]]; then
+        if [[ "$has_image_tags" -eq 1 ]]; then
             echo "  Image tags:"
             grep "image:.*:latest" "$file" | sed "s/image:/  /" | while read -r line; do
                 echo "    OLD: $line"
@@ -163,7 +171,7 @@ update_file() {
         fi
 
         # Show targetRevision changes
-        if [[ "$has_target_revision" -gt 0 ]]; then
+        if [[ "$has_target_revision" -eq 1 ]]; then
             echo "  Target Revision:"
             grep "targetRevision: master" "$file" | while read -r line; do
                 echo "    OLD: $line"
@@ -172,16 +180,16 @@ update_file() {
         fi
 
         # Show git-branch changes
-        if [[ "$has_git_branch" -gt 0 ]]; then
+        if [[ "$has_git_branch" -eq 1 ]]; then
             echo "  Git Branch:"
-            grep "git-branch: master\|github-branch: master" "$file" | while read -r line; do
+            grep -E "git-branch: master|github-branch: master" "$file" | while read -r line; do
                 echo "    OLD: $line"
                 echo "    NEW: ${line/master/${branch}}"
             done
         fi
 
         # Show GitHub URL changes
-        if [[ "$has_github_url" -gt 0 ]]; then
+        if [[ "$has_github_url" -eq 1 ]]; then
             echo "  GitHub URLs:"
             grep "raw.githubusercontent.com/red-hat-storage/ocs-workloads/master" "$file" | while read -r line; do
                 echo "    OLD: ...ocs-workloads/master/..."
@@ -192,16 +200,16 @@ update_file() {
         # Apply changes based on OS
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS sed requires '' after -i
-            [[ "$has_image_tags" -gt 0 ]] && sed -i '' "s/:latest/:${branch}/g" "$file"
-            [[ "$has_target_revision" -gt 0 ]] && sed -i '' "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
-            [[ "$has_git_branch" -gt 0 ]] && sed -i '' "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
-            [[ "$has_github_url" -gt 0 ]] && sed -i '' "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
+            [[ "$has_image_tags" -eq 1 ]] && sed -i '' "s/:latest/:${branch}/g" "$file"
+            [[ "$has_target_revision" -eq 1 ]] && sed -i '' "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
+            [[ "$has_git_branch" -eq 1 ]] && sed -i '' "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
+            [[ "$has_github_url" -eq 1 ]] && sed -i '' "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
         else
             # Linux sed doesn't need '' after -i
-            [[ "$has_image_tags" -gt 0 ]] && sed -i "s/:latest/:${branch}/g" "$file"
-            [[ "$has_target_revision" -gt 0 ]] && sed -i "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
-            [[ "$has_git_branch" -gt 0 ]] && sed -i "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
-            [[ "$has_github_url" -gt 0 ]] && sed -i "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
+            [[ "$has_image_tags" -eq 1 ]] && sed -i "s/:latest/:${branch}/g" "$file"
+            [[ "$has_target_revision" -eq 1 ]] && sed -i "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
+            [[ "$has_git_branch" -eq 1 ]] && sed -i "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
+            [[ "$has_github_url" -eq 1 ]] && sed -i "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
         fi
         print_success "Updated: $file"
     fi
