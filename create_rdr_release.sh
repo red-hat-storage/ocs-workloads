@@ -174,8 +174,14 @@ update_file() {
         has_github_url=1
     fi
 
+    # Check for VM containerDisk images (url: docker://)
+    local has_vm_images=0
+    if grep -q "url:.*docker://" "$file" 2>/dev/null; then
+        has_vm_images=1
+    fi
+
     # Skip if no changes needed
-    if [[ "$has_image_tags" -eq 0 && "$has_target_revision" -eq 0 && "$has_git_branch" -eq 0 && "$has_github_url" -eq 0 ]]; then
+    if [[ "$has_image_tags" -eq 0 && "$has_target_revision" -eq 0 && "$has_git_branch" -eq 0 && "$has_github_url" -eq 0 && "$has_vm_images" -eq 0 ]]; then
         return 1
     fi
 
@@ -219,6 +225,18 @@ update_file() {
                 echo "    NEW: ...ocs-workloads/${branch}/..."
             done
         fi
+
+        # Show VM containerDisk image changes
+        if [[ "$has_vm_images" -eq 1 ]]; then
+            echo "  VM Images (containerDisk):"
+            grep "url:.*docker://" "$file" | while read -r line; do
+                # Extract just the image part for display
+                local old_url=$(echo "$line" | sed 's/.*url:[[:space:]]*//g' | sed "s/'//g" | sed 's/"//g')
+                local new_url=$(echo "$old_url" | sed "s/\(.*\):[^:]*$/\1:${branch}/")
+                echo "    OLD: $old_url"
+                echo "    NEW: $new_url"
+            done
+        fi
     else
         # Apply changes based on OS
         if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -227,12 +245,14 @@ update_file() {
             [[ "$has_target_revision" -eq 1 ]] && sed -i '' "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
             [[ "$has_git_branch" -eq 1 ]] && sed -i '' "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
             [[ "$has_github_url" -eq 1 ]] && sed -i '' "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
+            [[ "$has_vm_images" -eq 1 ]] && sed -i '' "s|\(url:.*docker://[^:]*\):[^\"']*|\1:${branch}|g" "$file"
         else
             # Linux sed doesn't need '' after -i
             [[ "$has_image_tags" -eq 1 ]] && sed -i "s/:latest/:${branch}/g" "$file"
             [[ "$has_target_revision" -eq 1 ]] && sed -i "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
             [[ "$has_git_branch" -eq 1 ]] && sed -i "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
             [[ "$has_github_url" -eq 1 ]] && sed -i "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
+            [[ "$has_vm_images" -eq 1 ]] && sed -i "s|\(url:.*docker://[^:]*\):[^\"']*|\1:${branch}|g" "$file"
         fi
         print_success "Updated: $file"
     fi

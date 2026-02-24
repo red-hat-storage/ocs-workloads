@@ -6,7 +6,7 @@ Before creating a release branch with the `create_rdr_release.sh` script, you mu
 
 The following **8 container images** are used in the `rdr/` workloads and must be tagged with your release version:
 
-### Images in quay.io/ocsci/ (2 images)
+### Images in quay.io/ocsci/ (3 images)
 
 1. **quay.io/ocsci/rdr-ocs-workload**
    - Current: `quay.io/ocsci/rdr-ocs-workload:latest`
@@ -20,33 +20,39 @@ The following **8 container images** are used in the `rdr/` workloads and must b
    - Used in: File browser workload
    - Files: file-browser deployment files
 
+3. **quay.io/ocsci/cirros-dd**
+   - Current: `quay.io/ocsci/cirros-dd:0.6.3` or `:latest`
+   - Release: `quay.io/ocsci/cirros-dd:release-4.17`
+   - Used in: VM workloads (containerDisk)
+   - Files: VirtualMachine and DataVolume YAML files
+
 ### Images in quay.io/prsurve/ (5 images)
 
-3. **quay.io/prsurve/mongodb_rdr**
+4. **quay.io/prsurve/mongodb_rdr**
    - Current: `quay.io/prsurve/mongodb_rdr:latest`
    - Release: `quay.io/prsurve/mongodb_rdr:release-4.17`
    - Used in: MongoDB workloads
    - Files: mongodb and mongodb-cephfs deployment files
 
-4. **quay.io/prsurve/mongodb_data_write**
+5. **quay.io/prsurve/mongodb_data_write**
    - Current: `quay.io/prsurve/mongodb_data_write:latest`
    - Release: `quay.io/prsurve/mongodb_data_write:release-4.17`
    - Used in: MongoDB IO writer workloads
    - Files: mongodb io_writer files
 
-5. **quay.io/prsurve/mysql**
+6. **quay.io/prsurve/mysql**
    - Current: `quay.io/prsurve/mysql:latest`
    - Release: `quay.io/prsurve/mysql:release-4.17`
    - Used in: MySQL workloads
    - Files: mysql deployment files
 
-6. **quay.io/prsurve/mysql_data_write**
+7. **quay.io/prsurve/mysql_data_write**
    - Current: `quay.io/prsurve/mysql_data_write:latest`
    - Release: `quay.io/prsurve/mysql_data_write:release-4.17`
    - Used in: MySQL IO writer workloads
    - Files: mysql io_writer files
 
-7. **quay.io/prsurve/filebrowser_data_write**
+8. **quay.io/prsurve/filebrowser_data_write**
    - Current: `quay.io/prsurve/filebrowser_data_write:latest`
    - Release: `quay.io/prsurve/filebrowser_data_write:release-4.17`
    - Used in: File browser client workloads
@@ -54,7 +60,7 @@ The following **8 container images** are used in the `rdr/` workloads and must b
 
 ### External Images (1 image - Optional)
 
-8. **quay.io/prometheus/busybox**
+9. **quay.io/prometheus/busybox**
    - Current: `quay.io/prometheus/busybox:latest`
    - Release: Not required (external image)
    - Note: This is an external Prometheus image. You don't need to tag this unless you want to pin a specific version.
@@ -74,16 +80,49 @@ Examples:
 
 This is enforced by the `tag_images.sh` script.
 
+## Automatic Image Detection
+
+The `tag_images.sh` and `verify_images.sh` scripts **automatically detect** all container images in the `rdr/` directory. You don't need to manually update the scripts when adding new images!
+
+**How it works:**
+1. Scripts scan all YAML files in `rdr/` directory
+2. Detect two types of images:
+   - Container images: `image: quay.io/...:latest`
+   - VM images (containerDisk): `url: docker://quay.io/...:version` (any version)
+3. Extract unique image names with their current tags
+4. Exclude external images (e.g., `quay.io/prometheus/*`)
+5. Tag from current version to release version (e.g., `:0.6.3` → `:release-4.17`)
+
+**Detected Image Types:**
+- ✅ Standard container images (Deployments, Pods)
+- ✅ VM containerDisk images (VirtualMachines, DataVolumes)
+- ✅ Images with `:latest` tag
+- ✅ Images with specific version tags (e.g., `:0.6.3`)
+
+**Multi-Architecture Support:**
+- ✅ **skopeo**: Uses `--all` flag to preserve all architectures (amd64, arm64, etc.)
+- ✅ **docker/podman**: Preserves multi-arch manifests by default
+- ✅ All architectures are maintained in the release tag
+
+**Benefits:**
+- ✅ No manual script updates needed when adding new images
+- ✅ Automatically stays in sync with your workloads
+- ✅ Handles both container and VM images
+- ✅ Handles images with any tag (not just :latest)
+- ✅ Preserves multi-architecture manifests
+- ✅ Reduces maintenance overhead
+
 ---
 
 ## Quick Reference Checklist
 
 For release **release-4.17**, tag and push these images:
 
-### Required Images (7 total)
+### Required Images (8 total)
 
 - [ ] `quay.io/ocsci/rdr-ocs-workload:release-4.17`
 - [ ] `quay.io/ocsci/filebrowser:release-4.17`
+- [ ] `quay.io/ocsci/cirros-dd:release-4.17`
 - [ ] `quay.io/prsurve/mongodb_rdr:release-4.17`
 - [ ] `quay.io/prsurve/mongodb_data_write:release-4.17`
 - [ ] `quay.io/prsurve/mysql:release-4.17`
@@ -156,10 +195,11 @@ Here's a helper script to tag all images at once:
 #!/bin/bash
 RELEASE_TAG="release-4.17"
 
-# List of images to tag (excluding external prometheus image)
+# List of images to tag (Note: Scripts now auto-detect, this is just an example)
 images=(
   "quay.io/ocsci/rdr-ocs-workload"
   "quay.io/ocsci/filebrowser"
+  "quay.io/ocsci/cirros-dd"
   "quay.io/prsurve/mongodb_rdr"
   "quay.io/prsurve/mongodb_data_write"
   "quay.io/prsurve/mysql"
@@ -185,10 +225,11 @@ echo "All images tagged successfully!"
 #!/bin/bash
 RELEASE_TAG="release-4.17"
 
-# List of images to tag (excluding external prometheus image)
+# List of images to tag (Note: Scripts now auto-detect, this is just an example)
 images=(
   "quay.io/ocsci/rdr-ocs-workload"
   "quay.io/ocsci/filebrowser"
+  "quay.io/ocsci/cirros-dd"
   "quay.io/prsurve/mongodb_rdr"
   "quay.io/prsurve/mongodb_data_write"
   "quay.io/prsurve/mysql"
@@ -220,6 +261,7 @@ RELEASE_TAG="release-4.17"
 # Verify each image exists
 skopeo inspect docker://quay.io/ocsci/rdr-ocs-workload:${RELEASE_TAG}
 skopeo inspect docker://quay.io/ocsci/filebrowser:${RELEASE_TAG}
+skopeo inspect docker://quay.io/ocsci/cirros-dd:${RELEASE_TAG}
 skopeo inspect docker://quay.io/prsurve/mongodb_rdr:${RELEASE_TAG}
 skopeo inspect docker://quay.io/prsurve/mongodb_data_write:${RELEASE_TAG}
 skopeo inspect docker://quay.io/prsurve/mysql:${RELEASE_TAG}

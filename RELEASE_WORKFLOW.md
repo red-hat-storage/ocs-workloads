@@ -32,20 +32,31 @@ This document provides a quick reference for creating RDR releases.
 
 ## What Gets Updated
 
-### Container Images (7 total)
+### Container Images (Auto-Detected)
+
+The scripts **automatically detect** all images in the `rdr/` directory with any tag:
+
+Currently detected (example):
 - `quay.io/ocsci/rdr-ocs-workload:latest` → `:release-4.17`
 - `quay.io/ocsci/filebrowser:latest` → `:release-4.17`
+- `quay.io/ocsci/cirros-dd:0.6.3` → `:release-4.17` (VM image)
 - `quay.io/prsurve/mongodb_rdr:latest` → `:release-4.17`
 - `quay.io/prsurve/mongodb_data_write:latest` → `:release-4.17`
 - `quay.io/prsurve/mysql:latest` → `:release-4.17`
 - `quay.io/prsurve/mysql_data_write:latest` → `:release-4.17`
 - `quay.io/prsurve/filebrowser_data_write:latest` → `:release-4.17`
 
+**Note:**
+- New images added to the `rdr/` directory are automatically detected - no script updates needed!
+- Multi-arch images are fully preserved (all architectures maintained)
+- Works with any image tag (`:latest`, `:0.6.3`, etc.)
+
 ### YAML Files (~70 files in rdr/ folder)
-1. **Image tags**: `:latest` → `:release-4.17`
-2. **ApplicationSet targetRevision**: `master` → `release-4.17`
-3. **Subscription git-branch**: `master` → `release-4.17`
-4. **GitHub raw URLs**: `/master/` → `/release-4.17/`
+1. **Container image tags**: `:latest` → `:release-4.17`
+2. **VM containerDisk images**: Any version → `:release-4.17`
+3. **ApplicationSet targetRevision**: `master` → `release-4.17`
+4. **Subscription git-branch**: `master` → `release-4.17`
+5. **GitHub raw URLs**: `/master/` → `/release-4.17/`
 
 ## Common Commands
 
@@ -96,6 +107,11 @@ Before running these scripts, ensure you have:
 3. **Required tools**
    - For image tagging: `skopeo` (recommended), `docker`, or `podman`
    - For image verification: `skopeo`
+
+4. **Multi-arch image support**
+   - `skopeo`: Uses `--all` flag to preserve all architectures
+   - `docker/podman`: Preserves multi-arch manifests by default
+   - All architectures (amd64, arm64, ppc64le, s390x, etc.) are maintained
 
 ### Installing skopeo
 ```bash

@@ -48,22 +48,27 @@ EXAMPLES:
     $0 -t release-4.17 -d
 
 DESCRIPTION:
-    This script will tag and push all 7 required container images from :latest
-    to your specified release tag.
+    This script automatically detects and tags all container images found in the
+    rdr/ directory. It handles both:
+      - Container images with :latest tag
+      - VM containerDisk images with any version tag (e.g., :0.6.3)
 
-    Images that will be tagged:
-      - quay.io/ocsci/rdr-ocs-workload
-      - quay.io/ocsci/filebrowser
-      - quay.io/prsurve/mongodb_rdr
-      - quay.io/prsurve/mongodb_data_write
-      - quay.io/prsurve/mysql
-      - quay.io/prsurve/mysql_data_write
-      - quay.io/prsurve/filebrowser_data_write
+    The script preserves multi-architecture manifests using:
+      - skopeo: Uses --all flag to explicitly copy all architectures
+      - docker/podman: Preserves multi-arch by default
+
+    Auto-detected images (example):
+      - quay.io/ocsci/rdr-ocs-workload:latest → :release-4.17
+      - quay.io/ocsci/filebrowser:latest → :release-4.17
+      - quay.io/ocsci/cirros-dd:0.6.3 → :release-4.17 (VM image)
+      - quay.io/prsurve/mongodb_rdr:latest → :release-4.17
+      - And more...
 
 NOTES:
     - Run this script BEFORE create_rdr_release.sh
     - Ensure you have push permissions to Quay repositories
     - Skopeo method is recommended (fastest, no local pull required)
+    - Multi-arch images are fully preserved with all architectures
 
 EOF
     exit 1
@@ -144,19 +149,84 @@ print_info "Release Tag: $RELEASE_TAG"
 print_info "Method: $METHOD"
 echo ""
 
-# List of images to tag (excluding external prometheus image)
-declare -a images=(
-    "quay.io/ocsci/rdr-ocs-workload"
-    "quay.io/ocsci/filebrowser"
-    "quay.io/prsurve/mongodb_rdr"
-    "quay.io/prsurve/mongodb_data_write"
-    "quay.io/prsurve/mysql"
-    "quay.io/prsurve/mysql_data_write"
-    "quay.io/prsurve/filebrowser_data_write"
-)
+# Check if rdr/ directory exists
+if [[ ! -d "rdr" ]]; then
+    print_error "rdr/ directory not found! Please run this script from the repository root."
+    exit 1
+fi
 
-total_images=${#images[@]}
-print_info "Will tag $total_images container images"
+# Auto-detect all images from rdr/ directory
+print_info "Scanning rdr/ directory for container images..."
+
+# Use parallel arrays for bash 3.x compatibility
+declare -a image_names
+declare -a image_current_tags
+
+# Temporary file to collect all images with their current tags
+temp_file=$(mktemp)
+trap 'rm -f "$temp_file"' EXIT
+
+# Pattern 1: Extract images with :latest tag (container images)
+grep -rh "image:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
+    sed 's/.*image:[[:space:]]*//g' | \
+    sed 's/[[:space:]]*#.*//g' | \
+    sed "s/'//g" | \
+    sed 's/"//g' | \
+    grep -v "^$" | \
+    grep -v "quay.io/prometheus" | \
+    sort -u | \
+while IFS= read -r line; do
+    if [[ -n "$line" ]]; then
+        image=$(echo "$line" | sed 's/:latest$//')
+        echo "${image}|latest" >> "$temp_file"
+    fi
+done
+
+# Pattern 2: Extract VM images with any tag (containerDisk images)
+grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
+    grep -v "quay.io/prometheus" | \
+    sort -u | \
+while IFS= read -r line; do
+    if [[ -n "$line" ]]; then
+        # Extract full image with tag: quay.io/ocsci/cirros-dd:0.6.3
+        full_image=$(echo "$line" | sed 's/.*docker:\/\///g' | sed 's/[[:space:]]*#.*//g' | sed "s/'//g" | sed 's/"//g')
+        # Extract image without tag: quay.io/ocsci/cirros-dd
+        image=$(echo "$full_image" | sed 's/:[^:]*$//')
+        # Extract current tag: 0.6.3
+        current_tag=$(echo "$full_image" | sed 's/.*://')
+
+        # Check if image already exists in temp file
+        if ! grep -q "^${image}|" "$temp_file" 2>/dev/null; then
+            echo "${image}|${current_tag}" >> "$temp_file"
+        fi
+    fi
+done
+
+# Read unique images into parallel arrays (avoid subshell by using process substitution correctly)
+while IFS='|' read -r img_name img_tag; do
+    image_names+=("$img_name")
+    image_current_tags+=("$img_tag")
+done < <(sort -u "$temp_file" 2>/dev/null)
+
+total_images=${#image_names[@]}
+
+if [[ $total_images -eq 0 ]]; then
+    print_warning "No container images found in rdr/ directory"
+    print_info "This might mean:"
+    echo "  - All images are already tagged with a specific version"
+    echo "  - There are no YAML files with container images"
+    echo "  - You're not in the repository root directory"
+    exit 0
+fi
+
+print_success "Found $total_images unique image(s) to tag"
+echo ""
+
+# Show the images that will be tagged
+print_info "Images to be tagged:"
+for ((i=0; i<${#image_names[@]}; i++)); do
+    echo "  - ${image_names[$i]}:${image_current_tags[$i]} → ${image_names[$i]}:${RELEASE_TAG}"
+done
 echo ""
 
 if [[ "$DRY_RUN" == "true" ]]; then
@@ -169,18 +239,22 @@ success_count=0
 failed_count=0
 declare -a failed_images
 
-for image in "${images[@]}"; do
+for ((i=0; i<${#image_names[@]}; i++)); do
+    image="${image_names[$i]}"
+    current_tag="${image_current_tags[$i]}"
     print_info "Processing: $image"
 
     if [[ "$DRY_RUN" == "true" ]]; then
-        echo "  Would tag: ${image}:latest → ${image}:${RELEASE_TAG}"
+        echo "  Would tag: ${image}:${current_tag} → ${image}:${RELEASE_TAG}"
         echo "  Would push: ${image}:${RELEASE_TAG}"
         ((success_count++))
     else
         case "$METHOD" in
             skopeo)
-                if skopeo copy \
-                    docker://${image}:latest \
+                # Use --all flag to explicitly preserve multi-arch manifests
+                # This ensures all architectures (amd64, arm64, etc.) are copied
+                if skopeo copy --all \
+                    docker://${image}:${current_tag} \
                     docker://${image}:${RELEASE_TAG} 2>&1; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"
                     ((success_count++))
@@ -192,8 +266,10 @@ for image in "${images[@]}"; do
                 ;;
             docker|podman)
                 # Pull, tag, and push
-                if ${METHOD} pull ${image}:latest && \
-                   ${METHOD} tag ${image}:latest ${image}:${RELEASE_TAG} && \
+                # Note: docker/podman preserve multi-arch manifests by default when pulling
+                # The manifest list is maintained across tag and push operations
+                if ${METHOD} pull ${image}:${current_tag} && \
+                   ${METHOD} tag ${image}:${current_tag} ${image}:${RELEASE_TAG} && \
                    ${METHOD} push ${image}:${RELEASE_TAG}; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"
                     ((success_count++))

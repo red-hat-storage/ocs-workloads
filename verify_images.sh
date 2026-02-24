@@ -92,19 +92,49 @@ fi
 print_info "Verifying RDR Container Images for Release: $RELEASE_TAG"
 echo ""
 
-# List of images to verify (excluding external prometheus image)
-declare -a images=(
-    "quay.io/ocsci/rdr-ocs-workload"
-    "quay.io/ocsci/filebrowser"
-    "quay.io/prsurve/mongodb_rdr"
-    "quay.io/prsurve/mongodb_data_write"
-    "quay.io/prsurve/mysql"
-    "quay.io/prsurve/mysql_data_write"
-    "quay.io/prsurve/filebrowser_data_write"
+# Check if rdr/ directory exists
+if [[ ! -d "rdr" ]]; then
+    print_error "rdr/ directory not found! Please run this script from the repository root."
+    exit 1
+fi
+
+# Auto-detect all images from rdr/ directory
+print_info "Scanning rdr/ directory for container images..."
+
+# Extract all unique images, excluding external images
+# Handles both "image:" fields and "url: docker://" fields
+declare -a images
+while IFS= read -r image; do
+    images+=("$image")
+done < <(
+    {
+        # Pattern 1: image: with :latest tag
+        grep -rh "image:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
+        sed 's/.*image:[[:space:]]*//g' | \
+        sed 's/:latest//g'
+
+        # Pattern 2: url: docker:// with any tag (for VM images)
+        grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
+        sed 's/.*docker:\/\///g' | \
+        sed 's/\(.*\):[^:]*$/\1/'  # Remove tag
+    } | \
+    sed 's/[[:space:]]*#.*//g' | \
+    sed "s/'//g" | \
+    sed 's/"//g' | \
+    grep -v "^$" | \
+    grep -v "quay.io/prometheus" | \
+    sort -u
 )
 
 total_images=${#images[@]}
-print_info "Checking $total_images container images..."
+
+if [[ $total_images -eq 0 ]]; then
+    print_warning "No container images found in rdr/ directory"
+    print_info "Nothing to verify"
+    exit 0
+fi
+
+print_info "Checking $total_images container image(s)..."
 echo ""
 
 # Verify each image

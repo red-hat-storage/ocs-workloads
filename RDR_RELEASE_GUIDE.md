@@ -71,7 +71,7 @@ Deploy workloads from the release branch and verify everything works correctly.
 
 ### Container Image Tagging (`tag_images.sh`)
 
-This script tags and pushes all 7 required container images to Quay.io.
+This script **automatically detects and tags** all container images with `:latest` tag found in the `rdr/` directory. No manual updates needed when adding new images!
 
 **Usage:**
 ```bash
@@ -96,22 +96,46 @@ This script tags and pushes all 7 required container images to Quay.io.
 ./tag_images.sh -t release-4.17 -d
 ```
 
-**Images Tagged:**
-- `quay.io/ocsci/rdr-ocs-workload:release-4.17`
-- `quay.io/ocsci/filebrowser:release-4.17`
-- `quay.io/prsurve/mongodb_rdr:release-4.17`
-- `quay.io/prsurve/mongodb_data_write:release-4.17`
-- `quay.io/prsurve/mysql:release-4.17`
-- `quay.io/prsurve/mysql_data_write:release-4.17`
-- `quay.io/prsurve/filebrowser_data_write:release-4.17`
+**How Auto-Detection Works:**
+- Scans all YAML files in `rdr/` directory
+- Extracts container images with `:latest` tag
+- Extracts VM containerDisk images with any version tag
+- Detects current tag for each image (latest, 0.6.3, etc.)
+- Excludes external images (e.g., `quay.io/prometheus/*`)
+- Shows you the complete list before tagging
 
-See [IMAGE_TAGGING_GUIDE.md](IMAGE_TAGGING_GUIDE.md) for detailed information about manual tagging.
+**Example Output:**
+```
+[INFO] Scanning rdr/ directory for container images...
+[SUCCESS] Found 8 unique image(s) to tag
+
+[INFO] Images to be tagged:
+  - quay.io/ocsci/cirros-dd:0.6.3 → quay.io/ocsci/cirros-dd:release-4.17
+  - quay.io/ocsci/filebrowser:latest → quay.io/ocsci/filebrowser:release-4.17
+  - quay.io/ocsci/rdr-ocs-workload:latest → quay.io/ocsci/rdr-ocs-workload:release-4.17
+  - quay.io/prsurve/filebrowser_data_write:latest → ...
+  [and more...]
+```
+
+**Multi-Architecture Preservation:**
+- ✅ **skopeo** (recommended): Uses `--all` flag to copy all architectures
+- ✅ **docker/podman**: Preserves multi-arch manifests by default
+- ✅ All architectures (amd64, arm64, etc.) are maintained in release tags
+
+**Benefits:**
+- ✅ Automatically stays synchronized with your workloads
+- ✅ No script updates needed when adding new images
+- ✅ Handles images with any tag (not just :latest)
+- ✅ Preserves multi-architecture images
+- ✅ Reduces manual maintenance
+
+See [IMAGE_TAGGING_GUIDE.md](IMAGE_TAGGING_GUIDE.md) for detailed information.
 
 ---
 
 ### Image Verification (`verify_images.sh`)
 
-This script verifies that all required images exist in Quay.io before creating the release.
+This script **automatically detects and verifies** that all container images exist in Quay.io before creating the release. It scans the same images found in the `rdr/` directory.
 
 **Usage:**
 ```bash
@@ -169,7 +193,7 @@ Create the release branch and immediately push to remote:
 
 ## What Gets Updated
 
-The script updates **four types of references** in all YAML files within the `rdr/` directory:
+The script updates **five types of references** in all YAML files within the `rdr/` directory:
 
 ### 1. Container Image Tags
 
@@ -181,6 +205,18 @@ image: quay.io/ocsci/rdr-ocs-workload:latest
 **After (for branch `release-4.17`):**
 ```yaml
 image: quay.io/ocsci/rdr-ocs-workload:release-4.17
+```
+
+### 1b. VM ContainerDisk Images
+
+**Before:**
+```yaml
+url: docker://quay.io/ocsci/cirros-dd:0.6.3
+```
+
+**After (for branch `release-4.17`):**
+```yaml
+url: docker://quay.io/ocsci/cirros-dd:release-4.17
 ```
 
 ### 2. ApplicationSet Target Revision
@@ -387,12 +423,14 @@ $ ./create_rdr_release.sh -b release-4.17
 When you run the script with branch `release-4.17`, it will:
 
 1. ✅ Update all container image tags from `:latest` → `:release-4.17`
-2. ✅ Update all ApplicationSet `targetRevision: master` → `targetRevision: release-4.17`
-3. ✅ Update all Subscription git branch annotations from `master` → `release-4.17`
-4. ✅ Update all GitHub raw URLs from `/master/` → `/release-4.17/`
+2. ✅ Update all VM containerDisk image tags (any version) → `:release-4.17`
+3. ✅ Update all ApplicationSet `targetRevision: master` → `targetRevision: release-4.17`
+4. ✅ Update all Subscription git branch annotations from `master` → `release-4.17`
+5. ✅ Update all GitHub raw URLs from `/master/` → `/release-4.17/`
 
 This ensures that:
-- Your workloads use the correct versioned container images
+- Your container workloads use the correct versioned container images
+- Your VM workloads use the correct versioned containerDisk images
 - ArgoCD ApplicationSets pull from the correct Git branch
 - ACM Subscriptions pull from the correct Git branch
 - Scripts downloaded from GitHub come from the correct branch
