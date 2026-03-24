@@ -50,6 +50,7 @@ Currently detected (example):
 - New images added to the `rdr/` directory are automatically detected - no script updates needed!
 - Multi-arch images are fully preserved (all architectures maintained)
 - Works with any image tag (`:latest`, `:0.6.3`, etc.)
+- External images like `quay.io/prometheus/*` are automatically excluded from tagging
 
 ### YAML Files (~70 files in rdr/ folder)
 1. **Container image tags**: `:latest` → `:release-4.17`

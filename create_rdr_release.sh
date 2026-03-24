@@ -51,6 +51,7 @@ DESCRIPTION:
     This script will:
     1. Create a new git branch with the specified name
     2. Update all image tags in rdr/ folder from ':latest' to ':BRANCH_NAME'
+       (excluding external images like quay.io/prometheus/*)
     3. Commit the changes
     4. Optionally push to remote
 
@@ -150,9 +151,9 @@ update_file() {
     local branch=$2
     local dry_run=$3
 
-    # Check for image tags
+    # Check for image tags (excluding prometheus images)
     local has_image_tags=0
-    if grep -q "image:.*:latest" "$file" 2>/dev/null; then
+    if grep "image:.*:latest" "$file" 2>/dev/null | grep -qv "quay.io/prometheus"; then
         has_image_tags=1
     fi
 
@@ -174,9 +175,9 @@ update_file() {
         has_github_url=1
     fi
 
-    # Check for VM containerDisk images (url: docker://)
+    # Check for VM containerDisk images (url: docker://) - excluding prometheus
     local has_vm_images=0
-    if grep -q "url:.*docker://" "$file" 2>/dev/null; then
+    if grep "url:.*docker://" "$file" 2>/dev/null | grep -qv "quay.io/prometheus"; then
         has_vm_images=1
     fi
 
@@ -190,10 +191,10 @@ update_file() {
     if [[ "$dry_run" == "true" ]]; then
         print_warning "DRY RUN - Would update:"
 
-        # Show image tag changes
+        # Show image tag changes (excluding prometheus images)
         if [[ "$has_image_tags" -eq 1 ]]; then
             echo "  Image tags:"
-            grep "image:.*:latest" "$file" | sed "s/image:/  /" | while read -r line; do
+            grep "image:.*:latest" "$file" | grep -v "quay.io/prometheus" | sed "s/image:/  /" | while read -r line; do
                 echo "    OLD: $line"
                 echo "    NEW: ${line/:latest/:${branch}}"
             done
@@ -226,10 +227,10 @@ update_file() {
             done
         fi
 
-        # Show VM containerDisk image changes
+        # Show VM containerDisk image changes (excluding prometheus)
         if [[ "$has_vm_images" -eq 1 ]]; then
             echo "  VM Images (containerDisk):"
-            grep "url:.*docker://" "$file" | while read -r line; do
+            grep "url:.*docker://" "$file" | grep -v "quay.io/prometheus" | while read -r line; do
                 # Extract just the image part for display
                 local old_url=$(echo "$line" | sed 's/.*url:[[:space:]]*//g' | sed "s/'//g" | sed 's/"//g')
                 local new_url=$(echo "$old_url" | sed "s/\(.*\):[^:]*$/\1:${branch}/")
@@ -241,18 +242,22 @@ update_file() {
         # Apply changes based on OS
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS sed requires '' after -i
-            [[ "$has_image_tags" -eq 1 ]] && sed -i '' "s/:latest/:${branch}/g" "$file"
+            # For image tags: exclude prometheus images from replacement
+            [[ "$has_image_tags" -eq 1 ]] && sed -i '' "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
             [[ "$has_target_revision" -eq 1 ]] && sed -i '' "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
             [[ "$has_git_branch" -eq 1 ]] && sed -i '' "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
             [[ "$has_github_url" -eq 1 ]] && sed -i '' "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
-            [[ "$has_vm_images" -eq 1 ]] && sed -i '' "s|\(url:.*docker://[^:]*\):[^\"']*|\1:${branch}|g" "$file"
+            # For VM images: exclude prometheus images from replacement
+            [[ "$has_vm_images" -eq 1 ]] && sed -i '' "/quay.io\/prometheus/!s|\(url:.*docker://[^:]*\):[^\"']*|\1:${branch}|g" "$file"
         else
             # Linux sed doesn't need '' after -i
-            [[ "$has_image_tags" -eq 1 ]] && sed -i "s/:latest/:${branch}/g" "$file"
+            # For image tags: exclude prometheus images from replacement
+            [[ "$has_image_tags" -eq 1 ]] && sed -i "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
             [[ "$has_target_revision" -eq 1 ]] && sed -i "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
             [[ "$has_git_branch" -eq 1 ]] && sed -i "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
             [[ "$has_github_url" -eq 1 ]] && sed -i "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
-            [[ "$has_vm_images" -eq 1 ]] && sed -i "s|\(url:.*docker://[^:]*\):[^\"']*|\1:${branch}|g" "$file"
+            # For VM images: exclude prometheus images from replacement
+            [[ "$has_vm_images" -eq 1 ]] && sed -i "/quay.io\/prometheus/!s|\(url:.*docker://[^:]*\):[^\"']*|\1:${branch}|g" "$file"
         fi
         print_success "Updated: $file"
     fi
