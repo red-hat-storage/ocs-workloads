@@ -40,6 +40,7 @@ OPTIONS:
     -t, --tag TAG_NAME         Release tag name (required, e.g., release-4.17)
     -m, --method METHOD        Tagging method: docker, podman, or skopeo (default: skopeo)
     -a, --authfile FILE        Path to authentication file for skopeo (optional)
+    --insecure-policy          Skip signature verification (for skopeo)
     -d, --dry-run              Show what would be done without making changes
     -h, --help                 Show this help message
 
@@ -47,6 +48,7 @@ EXAMPLES:
     $0 -t release-4.17
     $0 --tag release-4.17 --method docker
     $0 -t release-4.17 -a ~/.docker/config.json
+    $0 -t release-4.17 --insecure-policy
     $0 -t release-4.17 -d
 
 DESCRIPTION:
@@ -80,6 +82,12 @@ AUTHENTICATION:
       $0 -t release-4.17 -a ~/.docker/config.json
       $0 -t release-4.17 -a \${XDG_RUNTIME_DIR}/containers/auth.json
 
+TROUBLESHOOTING:
+    If you get "Error loading trust policy" with skopeo, use:
+      $0 -t release-4.17 --insecure-policy
+
+    This skips signature verification (safe for internal registries like Quay.io)
+
 EOF
     exit 1
 }
@@ -88,6 +96,7 @@ EOF
 RELEASE_TAG=""
 METHOD="skopeo"
 AUTHFILE=""
+INSECURE_POLICY=false
 DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
@@ -103,6 +112,10 @@ while [[ $# -gt 0 ]]; do
         -a|--authfile)
             AUTHFILE="$2"
             shift 2
+            ;;
+        --insecure-policy)
+            INSECURE_POLICY=true
+            shift
             ;;
         -d|--dry-run)
             DRY_RUN=true
@@ -285,10 +298,13 @@ for ((i=0; i<${#image_names[@]}; i++)); do
                 # Use --all flag to explicitly preserve multi-arch manifests
                 # This ensures all architectures (amd64, arm64, etc.) are copied
 
-                # Build skopeo command with optional authfile
+                # Build skopeo command with optional flags
                 skopeo_opts="--all"
                 if [[ -n "$AUTHFILE" ]]; then
                     skopeo_opts="$skopeo_opts --authfile $AUTHFILE"
+                fi
+                if [[ "$INSECURE_POLICY" == "true" ]]; then
+                    skopeo_opts="$skopeo_opts --insecure-policy"
                 fi
 
                 if skopeo copy $skopeo_opts \

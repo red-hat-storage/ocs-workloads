@@ -91,6 +91,7 @@ This script **automatically detects and tags** all container images with `:lates
 - `-t, --tag TAG_NAME` - Release tag (required, e.g., release-4.17)
 - `-m, --method METHOD` - Tagging method: docker, podman, or skopeo (default: skopeo)
 - `-a, --authfile FILE` - Path to authentication file for skopeo (optional)
+- `--insecure-policy` - Skip signature verification for skopeo (use if you get trust policy errors)
 - `-d, --dry-run` - Preview what would be done without making changes
 - `-h, --help` - Show help message
 
@@ -393,6 +394,16 @@ The script provides colored output:
 - Examples: `v4.17`, `4.17`, `stable-2024`
 - **Solution**: Add `release-` prefix: `release-4.17`, `release-4.18`, etc.
 - This is a strict requirement to maintain consistency
+
+### "Error loading trust policy" (Skopeo)
+- **Error**: `FATA[0000] Error loading trust policy: invalid policy in...`
+- **Cause**: Skopeo requires a trust policy file for signature verification
+- **Solution**: Use the `--insecure-policy` flag to skip signature verification:
+  ```bash
+  ./tag_images.sh -t release-4.17 --insecure-policy
+  ```
+- **Note**: This is safe for trusted registries like Quay.io
+- **Alternative**: Create a proper policy.json file (see `man containers-policy.json`)
 
 ## Best Practices
 

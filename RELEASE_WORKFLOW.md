@@ -75,6 +75,9 @@ Currently detected (example):
 # With custom auth file
 ./tag_images.sh -t release-4.17 -a ~/.docker/config.json
 
+# Skip trust policy verification (if you get policy errors)
+./tag_images.sh -t release-4.17 --insecure-policy
+
 # Dry-run mode
 ./tag_images.sh -t release-4.17 -d
 ```
