@@ -161,21 +161,41 @@ See [IMAGE_TAGGING_GUIDE.md](IMAGE_TAGGING_GUIDE.md) for detailed information.
 
 ### Image Verification (`verify_images.sh`)
 
+This script verifies that all required container images exist in Quay with the specified release tag.
+
 This script **automatically detects and verifies** that all container images exist in Quay.io before creating the release. It scans the same images found in the `rdr/` directory.
 
 **Usage:**
 ```bash
-./verify_images.sh -t RELEASE_TAG
+./verify_images.sh -t RELEASE_TAG [OPTIONS]
 ```
 
 **Options:**
 - `-t, --tag TAG_NAME` - Release tag to verify (required)
+- `-a, --authfile FILE` - Path to authentication file for skopeo (optional)
+- `--platform PLATFORM` - Platform to check: auto (default), amd64, arm64
+- `-d, --debug` - Show detailed diagnostic information for missing images
 - `-h, --help` - Show help message
 
-**Example:**
+**Examples:**
 ```bash
+# Basic verification
 ./verify_images.sh -t release-4.17
+
+# Verify with debug information
+./verify_images.sh -t release-4.17 --debug
+
+# Verify specific platform (amd64/x86_64)
+./verify_images.sh -t release-4.17 --platform amd64
+
+# With custom auth file
+./verify_images.sh -t release-4.17 -a ~/.docker/config.json
 ```
+
+**Platform Support:**
+- `auto` (default): Uses linux/amd64, works well on macOS with Apple Silicon
+- `amd64`: Explicitly verify linux/amd64 (x86_64) images
+- `arm64`: Explicitly verify linux/arm64 images
 
 **Requirements:**
 - `skopeo` must be installed

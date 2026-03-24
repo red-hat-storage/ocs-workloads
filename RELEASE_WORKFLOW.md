@@ -84,7 +84,14 @@ Currently detected (example):
 
 ### Verify Images
 ```bash
+# Basic verification
 ./verify_images.sh -t release-4.17
+
+# Verify with debug info (if images are missing)
+./verify_images.sh -t release-4.17 --debug
+
+# Verify specific platform (amd64/x86_64)
+./verify_images.sh -t release-4.17 --platform amd64
 ```
 
 ### Create Release Branch
