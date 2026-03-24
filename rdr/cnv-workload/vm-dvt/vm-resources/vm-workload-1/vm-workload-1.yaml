@@ -16,7 +16,7 @@ spec:
     spec:
       source:
         registry:
-          url: docker://quay.io/ocsci/cirros-dd:0.6.3
+          url: docker://quay.io/ocsci/cirros-dd:release-4.21
       storage:
         accessModes:
         - ReadWriteMany

@@ -20,7 +20,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads.git
-        targetRevision: master
+        targetRevision: release-4.21
         path: rdr/mysql/cephfs/workloads/app-mysql-1
       destination:
         namespace: appset-mysql-1-cephfs
