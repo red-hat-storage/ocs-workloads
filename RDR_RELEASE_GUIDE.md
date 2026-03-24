@@ -21,8 +21,17 @@ The repository provides three scripts to automate this process:
 - `rdr/` directory must exist
 - **IMPORTANT**: Container images must be tagged in Quay BEFORE creating the release branch
 - You need push permissions to Quay repositories:
-  - `quay.io/ocsci/*` (2 images)
+  - `quay.io/ocsci/*` (3 images)
   - `quay.io/prsurve/*` (5 images)
+- **Authentication**: Login to Quay.io before running image tagging:
+  ```bash
+  # Login to Quay.io (credentials will be cached)
+  skopeo login quay.io
+  # OR
+  docker login quay.io
+  # OR
+  podman login quay.io
+  ```
 
 ## Quick Start - Complete Workflow
 
@@ -75,12 +84,13 @@ This script **automatically detects and tags** all container images with `:lates
 
 **Usage:**
 ```bash
-./tag_images.sh -t RELEASE_TAG [-m METHOD] [-d]
+./tag_images.sh -t RELEASE_TAG [-m METHOD] [-a AUTHFILE] [-d]
 ```
 
 **Options:**
 - `-t, --tag TAG_NAME` - Release tag (required, e.g., release-4.17)
 - `-m, --method METHOD` - Tagging method: docker, podman, or skopeo (default: skopeo)
+- `-a, --authfile FILE` - Path to authentication file for skopeo (optional)
 - `-d, --dry-run` - Preview what would be done without making changes
 - `-h, --help` - Show help message
 
@@ -92,8 +102,23 @@ This script **automatically detects and tags** all container images with `:lates
 # Tag using docker
 ./tag_images.sh -t release-4.17 -m docker
 
+# Tag with custom auth file
+./tag_images.sh -t release-4.17 -a ~/.docker/config.json
+
 # Preview what would be tagged
 ./tag_images.sh -t release-4.17 -d
+```
+
+**Authentication:**
+By default, skopeo uses cached credentials from `skopeo login quay.io`. You can optionally provide a custom authentication file:
+```bash
+# Using default cached credentials
+skopeo login quay.io
+./tag_images.sh -t release-4.17
+
+# Using custom auth file
+./tag_images.sh -t release-4.17 -a ~/.docker/config.json
+./tag_images.sh -t release-4.17 -a ${XDG_RUNTIME_DIR}/containers/auth.json
 ```
 
 **How Auto-Detection Works:**

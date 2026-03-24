@@ -39,12 +39,14 @@ Tag and push RDR container images to Quay.io for a release.
 OPTIONS:
     -t, --tag TAG_NAME         Release tag name (required, e.g., release-4.17)
     -m, --method METHOD        Tagging method: docker, podman, or skopeo (default: skopeo)
+    -a, --authfile FILE        Path to authentication file for skopeo (optional)
     -d, --dry-run              Show what would be done without making changes
     -h, --help                 Show this help message
 
 EXAMPLES:
     $0 -t release-4.17
     $0 --tag release-4.17 --method docker
+    $0 -t release-4.17 -a ~/.docker/config.json
     $0 -t release-4.17 -d
 
 DESCRIPTION:
@@ -70,6 +72,14 @@ NOTES:
     - Skopeo method is recommended (fastest, no local pull required)
     - Multi-arch images are fully preserved with all architectures
 
+AUTHENTICATION:
+    By default, skopeo uses cached credentials from previous logins:
+      skopeo login quay.io
+
+    You can also specify a custom auth file:
+      $0 -t release-4.17 -a ~/.docker/config.json
+      $0 -t release-4.17 -a \${XDG_RUNTIME_DIR}/containers/auth.json
+
 EOF
     exit 1
 }
@@ -77,6 +87,7 @@ EOF
 # Parse command line arguments
 RELEASE_TAG=""
 METHOD="skopeo"
+AUTHFILE=""
 DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
@@ -87,6 +98,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -m|--method)
             METHOD="$2"
+            shift 2
+            ;;
+        -a|--authfile)
+            AUTHFILE="$2"
             shift 2
             ;;
         -d|--dry-run)
@@ -144,9 +159,25 @@ if ! command -v "$METHOD" &> /dev/null; then
     exit 1
 fi
 
+# Validate authfile if provided
+if [[ -n "$AUTHFILE" ]]; then
+    if [[ ! -f "$AUTHFILE" ]]; then
+        print_error "Authentication file not found: $AUTHFILE"
+        exit 1
+    fi
+    if [[ "$METHOD" != "skopeo" ]]; then
+        print_warning "Authentication file is only supported with skopeo method"
+        print_info "Ignoring --authfile option"
+        AUTHFILE=""
+    fi
+fi
+
 print_info "RDR Container Image Tagging Script"
 print_info "Release Tag: $RELEASE_TAG"
 print_info "Method: $METHOD"
+if [[ -n "$AUTHFILE" ]]; then
+    print_info "Auth File: $AUTHFILE"
+fi
 echo ""
 
 # Check if rdr/ directory exists
@@ -253,7 +284,14 @@ for ((i=0; i<${#image_names[@]}; i++)); do
             skopeo)
                 # Use --all flag to explicitly preserve multi-arch manifests
                 # This ensures all architectures (amd64, arm64, etc.) are copied
-                if skopeo copy --all \
+
+                # Build skopeo command with optional authfile
+                skopeo_opts="--all"
+                if [[ -n "$AUTHFILE" ]]; then
+                    skopeo_opts="$skopeo_opts --authfile $AUTHFILE"
+                fi
+
+                if skopeo copy $skopeo_opts \
                     docker://${image}:${current_tag} \
                     docker://${image}:${RELEASE_TAG} 2>&1; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"

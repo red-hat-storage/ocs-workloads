@@ -72,6 +72,9 @@ Currently detected (example):
 # Using podman
 ./tag_images.sh -t release-4.17 -m podman
 
+# With custom auth file
+./tag_images.sh -t release-4.17 -a ~/.docker/config.json
+
 # Dry-run mode
 ./tag_images.sh -t release-4.17 -d
 ```
@@ -102,8 +105,9 @@ Before running these scripts, ensure you have:
    - You must be in the repository root
 
 2. **Quay.io push permissions**
-   - Access to `quay.io/ocsci/*` repositories (2 images)
+   - Access to `quay.io/ocsci/*` repositories (3 images)
    - Access to `quay.io/prsurve/*` repositories (5 images)
+   - Authentication: `skopeo login quay.io` or `docker login quay.io`
 
 3. **Required tools**
    - For image tagging: `skopeo` (recommended), `docker`, or `podman`
