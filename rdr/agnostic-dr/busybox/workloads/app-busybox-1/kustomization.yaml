@@ -1,5 +1,5 @@
 resources:
-- ../../../../busybox/base
+- ../../base
 patches:
   - target:
       kind: Deployment
@@ -12,12 +12,6 @@ patches:
       kind: PersistentVolumeClaim
       labelSelector: appname=busybox_app1
     patch: |-
-      - op: replace
-        path: /spec/accessModes/0
-        value: ReadWriteOnce
-      - op: replace
-        path: /spec/storageClassName
-        value: localblock
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app1_agnostic_dr
