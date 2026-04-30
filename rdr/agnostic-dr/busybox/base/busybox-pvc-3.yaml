@@ -10,5 +10,5 @@ spec:
   - ReadWriteOnce
   resources:
     requests:
-      storage: 76Gi
+      storage: 5Gi
   storageClassName: localblock
