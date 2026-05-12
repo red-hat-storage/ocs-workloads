@@ -1,8 +1,8 @@
 resources:
-- ../../../busybox/busybox/cephfs/workloads/app-busybox-1/
-- ../../../file-browser/cephfs/workloads/app-filebrowser-1
-- ../../../mysql/cephfs/workloads/app-mysql-1
-- ../../../mongodb-cephfs/app-mongodb-1/resources/deployment
+- ../../../busybox/cephfs/workloads/app-busybox-1/
+- ../../../file-browser/cephfs/workloads/app-filebrowser-1/
+- ../../../mysql/cephfs/workloads/app-mysql-1/
+- ../../../mongodb-cephfs/app-mongodb-1/resources/deployment/
 
 
 apiVersion: kustomize.config.k8s.io/v1beta1

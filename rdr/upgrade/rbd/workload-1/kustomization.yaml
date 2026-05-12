@@ -1,5 +1,5 @@
 resources:
-- ../../../busybox/busybox/rbd/workloads/app-busybox-1/
+- ../../../busybox/rbd/workloads/app-busybox-1/
 - ../../../file-browser/rbd/workloads/app-filebrowser-1
 - ../../../mysql/rbd/workloads/app-mysql-1
 - ../../../mongodb/app-mongodb-1/resources/deployment
