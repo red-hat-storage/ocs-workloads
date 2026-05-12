@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-4
+$patch: delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-pvc-4
+$patch: delete
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-5
+$patch: delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-pvc-5
+$patch: delete
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-6
+$patch: delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-pvc-6
+$patch: delete
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-7
+$patch: delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-pvc-7
+$patch: delete
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-8
+$patch: delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-pvc-8
+$patch: delete
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-9
+$patch: delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-pvc-9
+$patch: delete
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-10
+$patch: delete
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-pvc-10
+$patch: delete
