@@ -6,6 +6,9 @@ metadata:
     workloadpattern: simple_io
   name: busybox-8
 spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 600
   selector:
     matchLabels:
       workload: busybox-8
@@ -17,10 +20,22 @@ spec:
         workload: busybox-8
         appgroup: busybox-group
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: appgroup
+                  operator: In
+                  values:
+                  - busybox-group
+              topologyKey: kubernetes.io/hostname
       topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
-        whenUnsatisfiable: ScheduleAnyway
+        whenUnsatisfiable: DoNotSchedule
         labelSelector:
           matchLabels:
             appgroup: busybox-group
