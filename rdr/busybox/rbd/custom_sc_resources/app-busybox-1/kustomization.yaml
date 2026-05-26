@@ -14,7 +14,7 @@ patches:
     patch: |-
       - op: replace
         path: /spec/storageClassName
-        value: rbd-cnv-custom-sc
+        value: rbd-custom-sc
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app1_rbd
