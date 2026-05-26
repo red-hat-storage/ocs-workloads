@@ -20,6 +20,16 @@ spec:
         workload: busybox-2
         appgroup: busybox-group
     spec:
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - key: node.kubernetes.io/not-ready
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 180
+      - key: node.kubernetes.io/unreachable
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 180
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
