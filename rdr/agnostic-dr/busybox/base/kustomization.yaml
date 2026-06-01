@@ -5,3 +5,5 @@ resources:
 - busybox-pvc-2.yaml
 - busybox-dc-3.yaml
 - busybox-pvc-3.yaml
+- simple-io-configmap.yaml
+- replicationsource-rbac.yaml

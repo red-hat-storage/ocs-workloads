@@ -57,8 +57,15 @@ spec:
         volumeMounts:
         - mountPath: /mnt/test
           name: mypvc
+        - mountPath: /mnt/simple_io.sh
+          name: simple-io-script
+          subPath: simple_io.sh
       volumes:
       - name: mypvc
         persistentVolumeClaim:
           claimName: busybox-pvc-3
           readOnly: false
+      - name: simple-io-script
+        configMap:
+          name: simple-io-script
+          defaultMode: 0755
