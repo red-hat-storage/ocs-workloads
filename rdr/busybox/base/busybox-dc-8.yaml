@@ -6,6 +6,9 @@ metadata:
     workloadpattern: simple_io
   name: busybox-8
 spec:
+  replicas: 1
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 600
   selector:
     matchLabels:
       workload: busybox-8
@@ -17,6 +20,28 @@ spec:
         workload: busybox-8
         appgroup: busybox-group
     spec:
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - key: node.kubernetes.io/not-ready
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 180
+      - key: node.kubernetes.io/unreachable
+        operator: Exists
+        effect: NoExecute
+        tolerationSeconds: 180
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: appgroup
+                  operator: In
+                  values:
+                  - busybox-group
+              topologyKey: kubernetes.io/hostname
       topologySpreadConstraints:
       - maxSkew: 1
         topologyKey: kubernetes.io/hostname
