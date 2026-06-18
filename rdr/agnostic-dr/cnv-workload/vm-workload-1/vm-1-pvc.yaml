@@ -9,7 +9,7 @@ spec:
     kind: VolumeImportSource
     name: cirros-source
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 20Gi
