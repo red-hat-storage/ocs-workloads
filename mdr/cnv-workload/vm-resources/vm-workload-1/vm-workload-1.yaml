@@ -3,6 +3,8 @@ apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   name: vm-workload-1
+  labels:
+    appname: kubevirt
 spec:
   running: true
   template:
@@ -12,6 +14,7 @@ spec:
         vm.kubevirt.io/os: fedora
         vm.kubevirt.io/workload: server
       labels:
+        appname: kubevirt
         kubevirt.io/size: small
     spec:
       domain:
