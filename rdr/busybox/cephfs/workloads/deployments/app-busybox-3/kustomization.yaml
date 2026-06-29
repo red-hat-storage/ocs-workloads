@@ -1,5 +1,5 @@
 resources:
-- ../../../base
+- ../../../../base/deployments
 patches:
   - target:
       kind: Deployment

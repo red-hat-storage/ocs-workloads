@@ -1,0 +1,22 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  annotations:
+    cluster.open-cluster-management.io/experimental-scheduling-disable: "true"
+  name: busybox-sfs-1-placement
+  labels:
+    app: busybox-sfs-1
+spec:
+  prioritizerPolicy:
+    mode: Additive
+  predicates:
+    - requiredClusterSelector:
+        labelSelector:
+          matchExpressions:
+            - key: 'name'
+              operator: 'In'
+              values:
+                - PLACEHOLDER
+  clusterSets:
+    - PLACEHOLDER

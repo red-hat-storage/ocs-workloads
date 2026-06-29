@@ -21,7 +21,7 @@ spec:
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads.git
         targetRevision: master
-        path: rdr/busybox/cephfs/workloads/statefulsets
+        path: rdr/busybox/cephfs/workloads/statefulsets/app-busybox-1
       destination:
         namespace: appset-busybox-sfs-1-cephfs
         server: "{{server}}"
