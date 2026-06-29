@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vm-3-pvc
+spec:
+  dataSourceRef:
+    apiGroup: cdi.kubevirt.io
+    kind: VolumeImportSource
+    name: cirros-source
+  accessModes:
+    - ReadWriteOnly
+  resources:
+    requests:
+      storage: 512Mi
+  storageClassName: ocs-storagecluster-ceph-rbd-virtualization
+  volumeMode: Block
