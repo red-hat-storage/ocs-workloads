@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: busybox-statefulset-1-cephfs
+  name: busybox-sfs-1
   namespace: openshift-gitops
 spec:
   generators:
@@ -9,11 +9,11 @@ spec:
         configMapRef: acm-placement
         labelSelector:
           matchLabels:
-            cluster.open-cluster-management.io/placement: busybox-statefulset-1-cephfs-placement
+            cluster.open-cluster-management.io/placement: busybox-sfs-1-placement
         requeueAfterSeconds: 180
   template:
     metadata:
-      name: busybox-statefulset-1-cephfs-{{name}}
+      name: busybox-sfs-1-{{name}}
       labels:
         velero.io/exclude-from-backup: "true"
     spec:
@@ -21,9 +21,9 @@ spec:
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads.git
         targetRevision: master
-        path: rdr/busybox/cephfs/workloads/statefulsets
+        path: rdr/busybox/rbd/workloads/statefulsets
       destination:
-        namespace: appset-busybox-statefulset-1-cephfs
+        namespace: appset-busybox-sfs-1
         server: "{{server}}"
       syncPolicy:
         automated:
@@ -36,7 +36,7 @@ spec:
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  name: busybox-statefulset-1-cephfs-placement
+  name: busybox-sfs-1-placement
   namespace: openshift-gitops
 spec:
   predicates:

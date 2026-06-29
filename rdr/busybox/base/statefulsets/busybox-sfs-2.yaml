@@ -2,21 +2,21 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    appname: busybox_app_stateful_5
+    appname: busybox_app_sfs_2
     workloadpattern: simple_io
-  name: busybox-statefulset-5
+  name: busybox-sfs-2
 spec:
-  serviceName: busybox-statefulset-5
+  serviceName: busybox-sfs-2
   replicas: 1
   revisionHistoryLimit: 5
   selector:
     matchLabels:
-      workload: busybox-statefulset-5
+      workload: busybox-sfs-2
   podManagementPolicy: Parallel
   template:
     metadata:
       labels:
-        workload: busybox-statefulset-5
+        workload: busybox-sfs-2
         appgroup: busybox-group
     spec:
       terminationGracePeriodSeconds: 30
@@ -85,7 +85,7 @@ spec:
   - metadata:
       name: data
       labels:
-        appname: busybox_app_stateful_5
+        appname: busybox_app_sfs_2
         workloadpattern: simple_io_pvc
     spec:
       accessModes:

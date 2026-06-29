@@ -1,4 +1,0 @@
-namespace: ramen-busybox-statefulset-1
-resources:
-- channel.yaml
-- namespace.yaml
