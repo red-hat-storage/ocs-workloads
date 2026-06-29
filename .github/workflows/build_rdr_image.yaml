@@ -1,0 +1,135 @@
+name: Build Containers
+
+on:
+  pull_request:
+    types:
+      - labeled
+
+env:
+  REGISTRY_USER: ${{ secrets.QUAY_USER }}
+  IMAGE_REGISTRY: quay.io/ocsci
+  REGISTRY_PASSWORD: ${{ secrets.QUAY_SECRET }}
+
+jobs:
+  build_containers:
+    name: Build and Push Container
+    runs-on: ubuntu-latest
+
+    # Run only when these labels are added
+    if: |
+      github.event.label.name == 'force_build_image' ||
+      github.event.label.name == 'build_image'
+
+    steps:
+      # ------------------------------
+      # 1️⃣ Checkout Source Code
+      # ------------------------------
+      - name: Checkout Code
+        uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0  # Needed for diff detection
+
+      # ------------------------------
+      # 2️⃣ Detect Dockerfile Changes
+      # ------------------------------
+      - name: Detect Dockerfile changes
+        id: check_dockerfile
+        run: |
+          echo "🔍 Checking for Dockerfile changes..."
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q 'Dockerfile'; then
+            echo "dockerfile_changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Dockerfile changes detected."
+          else
+            echo "dockerfile_changed=false" >> $GITHUB_OUTPUT
+            echo "🛑 No Dockerfile changes detected."
+          fi
+
+      # ------------------------------
+      # 3️⃣ Determine Whether to Skip Build
+      # ------------------------------
+      - name: Check whether to skip build
+        id: skip_check
+        run: |
+          if [ "${{ github.event.label.name }}" = "build_image" ] && [ "${{ steps.check_dockerfile.outputs.dockerfile_changed }}" != "true" ]; then
+            echo "⏭️ Skipping build: No Dockerfile changes detected."
+            echo "skip_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_build=false" >> $GITHUB_OUTPUT
+          fi
+
+      # ------------------------------
+      # 4️⃣ Comment on PR (Skipped)
+      # ------------------------------
+      - name: Comment on PR (Skipped)
+        if: steps.skip_check.outputs.skip_build == 'true'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ⚠️ **Build Skipped**
+            No Dockerfile changes were detected in this PR.
+            Label: `${{ github.event.label.name }}`
+
+      # ------------------------------
+      # 5️⃣ Build Only If Not Skipped
+      # ------------------------------
+
+      # QEMU setup for multi-arch build
+      - name: Set up QEMU
+        if: steps.skip_check.outputs.skip_build == 'false'
+        uses: docker/setup-qemu-action@v3.2.0
+
+      # Set dynamic image tags
+      - name: Set image tags
+        if: steps.skip_check.outputs.skip_build == 'false'
+        id: set_tags
+        run: |
+          PR_TAG="pr-${{ github.event.pull_request.number }}"
+          BASE_TAG="$(echo "${{ github.base_ref }}" | tr '/' '-')"
+          echo "tags=${PR_TAG} ${BASE_TAG}" >> $GITHUB_OUTPUT
+          echo "🧾 Using tags: ${PR_TAG} ${BASE_TAG}"
+
+      # Build container image
+      - name: Buildah Build
+        if: steps.skip_check.outputs.skip_build == 'false'
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: rdr-ocs-workload
+          tags: ${{ steps.set_tags.outputs.tags }}
+          platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/riscv64,linux/s390x
+          containerfiles: |
+            ./rdr/container_image/Dockerfile
+
+      # Push image to Quay.io
+      - name: Push to Quay.io
+        if: steps.skip_check.outputs.skip_build == 'false'
+        id: push-to-quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+          registry: ${{ env.IMAGE_REGISTRY }}
+
+      # Comment on PR (Successful Build)
+      - name: Comment on PR (Build Success)
+        if: steps.skip_check.outputs.skip_build == 'false'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ✅ **Image Build Complete**
+            The container image was built and pushed successfully for branch `${{ github.head_ref }}`  
+            Label: `${{ github.event.label.name }}`
+            🏷️ Image tags: `${{ steps.set_tags.outputs.tags }}`
+
+      # ------------------------------
+      # 6️⃣ Clean Up (Always)
+      # ------------------------------
+      - name: Remove trigger label
+        uses: actions-ecosystem/action-remove-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: ${{ github.event.label.name }}
