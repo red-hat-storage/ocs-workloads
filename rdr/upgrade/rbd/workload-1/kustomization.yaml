@@ -1,0 +1,16 @@
+resources:
+- ../../../busybox/rbd/workloads/app-busybox-1/
+- ../../../file-browser/rbd/workloads/app-filebrowser-1
+- ../../../mysql/rbd/workloads/app-mysql-1
+- ../../../mongodb/app-mongodb-1/resources/deployment
+
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+labels:
+- includeSelectors: true
+  pairs:
+    environment: rbd
+    workload-type: upgrade
+patches:
+- path: delete-resources.yaml
