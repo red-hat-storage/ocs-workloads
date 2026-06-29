@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../../base/statefulsets/busybox-statefulset-1.yaml
+- ../../../base/statefulsets/busybox-statefulset-2.yaml
+- ../../../base/statefulsets/busybox-statefulset-3.yaml
+- ../../../base/statefulsets/busybox-statefulset-4.yaml
+- ../../../base/statefulsets/busybox-statefulset-5.yaml
+
+patches:
+- target:
+    kind: StatefulSet
+    name: busybox-statefulset-.*
+  patch: |-
+    - op: replace
+      path: /spec/volumeClaimTemplates/0/spec/storageClassName
+      value: ocs-storagecluster-ceph-rbd
