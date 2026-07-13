@@ -1,5 +1,6 @@
 ---
 resources:
+  - vm-secret.yaml
   - vm-1-source.yaml
   - vm-1-pvc.yaml
   - vm-workload-1.yaml
