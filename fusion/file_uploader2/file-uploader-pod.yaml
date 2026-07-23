@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    appname: file-uploader-fusion
+  name: file-uploader-fusion
+spec:
+  selector:
+    matchLabels:
+      workload: file-uploader-fusion
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        workload: file-uploader-fusion
+    spec:
+      containers:
+      - name: file-uploader-server
+        image: quay.io/ocsci/filebrowser:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /srv
+          name: mypvc
+      - name: file-generator
+        image: quay.io/ocsci/rdr-ocs-workload
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            UPLOAD_DIR="/srv";
+            FILE_SIZE_KB=1024;
+            INTERVAL=30;
+            echo "=== File Generator Started ===";
+            echo "Upload directory: ${UPLOAD_DIR}";
+            echo "File size: ${FILE_SIZE_KB}KB";
+            echo "Interval: ${INTERVAL}s";
+            COUNTER=0;
+            while true; do
+              COUNTER=$((COUNTER + 1));
+              TIMESTAMP=$(date +%Y%m%d_%H%M%S);
+              FILENAME="upload_${TIMESTAMP}_${COUNTER}.dat";
+              dd if=/dev/urandom of="${UPLOAD_DIR}/${FILENAME}" bs=1024 count=${FILE_SIZE_KB} 2>/dev/null;
+              CHECKSUM=$(md5sum "${UPLOAD_DIR}/${FILENAME}" | awk '{print $1}');
+              echo "${CHECKSUM}  ${FILENAME}" >> "${UPLOAD_DIR}/checksums.log";
+              FILE_COUNT=$(ls -1 "${UPLOAD_DIR}"/*.dat 2>/dev/null | wc -l);
+              DISK_USAGE=$(du -sh "${UPLOAD_DIR}" | awk '{print $1}');
+              echo "[$(date)] Generated: ${FILENAME} | MD5: ${CHECKSUM} | Files: ${FILE_COUNT} | Usage: ${DISK_USAGE}";
+              if [ "${FILE_COUNT}" -gt 100 ]; then
+                OLDEST=$(ls -1t "${UPLOAD_DIR}"/*.dat | tail -1);
+                echo "[$(date)] Removing oldest file: $(basename ${OLDEST})";
+                sed -i "/$(basename ${OLDEST})/d" "${UPLOAD_DIR}/checksums.log";
+                rm -f "${OLDEST}";
+              fi;
+              sleep ${INTERVAL};
+            done
+        volumeMounts:
+        - mountPath: /srv
+          name: mypvc
+      volumes:
+      - name: mypvc
+        persistentVolumeClaim:
+          claimName: file-uploader-fusion-pvc
+          readOnly: false
+
+# Made with Bob
