@@ -2,9 +2,9 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: vm-workload-1
+  name: fedora-recipe-vm-cli
   labels:
-    appname: kubevirt
+    appname: fedora-vm
 spec:
   running: true
   template:
@@ -14,8 +14,8 @@ spec:
         vm.kubevirt.io/os: fedora
         vm.kubevirt.io/workload: server
       labels:
-        appname: kubevirt
         kubevirt.io/size: small
+        appname: fedora-vm
     spec:
       domain:
         cpu:
@@ -67,5 +67,3 @@ spec:
               user: cirros
               password: gocubsgo
               chpasswd: { expire: False }
-
-# Made with Bob

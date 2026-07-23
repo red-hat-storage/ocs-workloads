@@ -8,5 +8,3 @@ spec:
     registry:
       # Image customized for ramen testing.
       url: "docker://quay.io/nirsof/cirros:0.6.2-1"
-
-# Made with Bob

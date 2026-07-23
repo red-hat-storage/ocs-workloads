@@ -4,7 +4,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: vm-1-pvc
   labels:
-    appname: kubevirt 
+    appname: fedora-vm
 spec:
   dataSourceRef:
     apiGroup: cdi.kubevirt.io
@@ -15,7 +15,5 @@ spec:
   resources:
     requests:
       storage: 512Mi
-  storageClassName: san-fs1-vm
-  volumeMode: Block
+  storageClassName: san-lg1-vm
 
-# Made with Bob
