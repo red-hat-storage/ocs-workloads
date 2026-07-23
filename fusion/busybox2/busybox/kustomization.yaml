@@ -1,0 +1,6 @@
+---
+resources:
+- busybox-pvc.yaml
+- busybox-pod.yaml
+
+# Made with Bob

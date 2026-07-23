@@ -1,0 +1,70 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: fedora-vm2-appset
+  labels:
+    appname: fedora-vm2
+spec:
+  running: true
+  template:
+    metadata:
+      annotations:
+        vm.kubevirt.io/flavor: small
+        vm.kubevirt.io/os: fedora
+        vm.kubevirt.io/workload: server
+      labels:
+        kubevirt.io/size: small
+        kubevirt.io/domain: fedora-vm2-appset
+        appname: fedora-vm2
+    spec:
+      domain:
+        cpu:
+          cores: 1
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+            - name: datadisk
+              disk:
+                bus: virtio
+            - name: cloudinit
+              disk: {}
+          interfaces:
+            - name: default
+              masquerade: {}
+              model: virtio
+              ports:
+                - name: http
+                  port: 8080
+                  protocol: TCP
+          networkInterfaceMultiqueue: true
+          rng: {}
+        features:
+          acpi: {}
+        machine:
+          type: pc-q35-rhel8.6.0
+        resources:
+          requests:
+            memory: 1Gi
+      evictionStrategy: LiveMigrate
+      networks:
+        - name: default
+          pod: {}
+      terminationGracePeriodSeconds: 180
+      volumes:
+        - name: rootdisk
+          persistentVolumeClaim:
+            claimName: vm-2-rootdisk-pvc
+        - name: datadisk
+          persistentVolumeClaim:
+            claimName: vm-2-datadisk-pvc
+        - name: cloudinit
+          cloudInitNoCloud:
+            secretRef:
+              name: vm-2-cloudinit
+
+# Made with Bob

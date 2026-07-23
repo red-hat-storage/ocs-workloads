@@ -1,0 +1,12 @@
+---
+resources:
+- secret.yaml
+- vm-2-cloudinit-secret.yaml
+- vm-2-source.yaml
+- vm-2-rootdisk-pvc.yaml
+- vm-2-datadisk-pvc.yaml
+- vm-workload-2.yaml
+- vm-2-service.yaml
+- vm-2-route.yaml
+
+# Made with Bob

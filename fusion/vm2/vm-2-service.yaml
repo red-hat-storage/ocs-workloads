@@ -1,0 +1,18 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: fedora-vm2-appset
+  labels:
+    appname: fedora-vm2
+spec:
+  ports:
+  - name: 8080-tcp
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP
+  selector:
+    kubevirt.io/domain: fedora-vm2-appset
+
+# Made with Bob

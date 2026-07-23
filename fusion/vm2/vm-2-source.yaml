@@ -1,0 +1,13 @@
+---
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: VolumeImportSource
+metadata:
+  name: fedora-source
+  labels:
+    appname: fedora-vm2
+spec:
+  source:
+    registry:
+      url: "docker://quay.io/containerdisks/fedora:latest"
+
+# Made with Bob
