@@ -2,7 +2,7 @@
 apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
-  name: fedora-recipe-vm-cli
+  name: fedora-appset
   labels:
     appname: fedora-vm
 spec:
