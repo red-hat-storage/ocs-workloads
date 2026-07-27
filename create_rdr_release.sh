@@ -157,6 +157,12 @@ update_file() {
         has_image_tags=1
     fi
 
+    # Check for kustomize patch value: image references (excluding prometheus)
+    local has_kustomize_images=0
+    if grep "value:.*:latest" "$file" 2>/dev/null | grep -qv "quay.io/prometheus"; then
+        has_kustomize_images=1
+    fi
+
     # Check for targetRevision: master
     local has_target_revision=0
     if grep -q "targetRevision: master" "$file" 2>/dev/null; then
@@ -175,14 +181,26 @@ update_file() {
         has_github_url=1
     fi
 
-    # Check for VM containerDisk images (url: docker://) - excluding prometheus
+    # Check for VM containerDisk images (url: docker://) with :latest tag only - excluding prometheus
     local has_vm_images=0
-    if grep "url:.*docker://" "$file" 2>/dev/null | grep -qv "quay.io/prometheus"; then
+    if grep "url:.*docker://.*:latest" "$file" 2>/dev/null | grep -qv "quay.io/prometheus"; then
         has_vm_images=1
     fi
 
+    # Warn about non-master branch references in git-branch/github-branch annotations
+    if grep -q -E "git-branch:|github-branch:" "$file" 2>/dev/null; then
+        local non_master_branches
+        non_master_branches=$(grep -E "git-branch:|github-branch:" "$file" | grep -v "master" | grep -v "^\s*#")
+        if [[ -n "$non_master_branches" ]]; then
+            print_warning "Skipping non-master branch reference in $file:"
+            echo "$non_master_branches" | while read -r line; do
+                echo "    $line"
+            done
+        fi
+    fi
+
     # Skip if no changes needed
-    if [[ "$has_image_tags" -eq 0 && "$has_target_revision" -eq 0 && "$has_git_branch" -eq 0 && "$has_github_url" -eq 0 && "$has_vm_images" -eq 0 ]]; then
+    if [[ "$has_image_tags" -eq 0 && "$has_kustomize_images" -eq 0 && "$has_target_revision" -eq 0 && "$has_git_branch" -eq 0 && "$has_github_url" -eq 0 && "$has_vm_images" -eq 0 ]]; then
         return 1
     fi
 
@@ -227,11 +245,19 @@ update_file() {
             done
         fi
 
-        # Show VM containerDisk image changes (excluding prometheus)
+        # Show kustomize patch value: image changes (excluding prometheus)
+        if [[ "$has_kustomize_images" -eq 1 ]]; then
+            echo "  Kustomize patch images:"
+            grep "value:.*:latest" "$file" | grep -v "quay.io/prometheus" | while read -r line; do
+                echo "    OLD: $line"
+                echo "    NEW: ${line/:latest/:${branch}}"
+            done
+        fi
+
+        # Show VM containerDisk image changes (only :latest, excluding prometheus)
         if [[ "$has_vm_images" -eq 1 ]]; then
             echo "  VM Images (containerDisk):"
-            grep "url:.*docker://" "$file" | grep -v "quay.io/prometheus" | while read -r line; do
-                # Extract just the image part for display
+            grep "url:.*docker://.*:latest" "$file" | grep -v "quay.io/prometheus" | while read -r line; do
                 local old_url=$(echo "$line" | sed 's/.*url:[[:space:]]*//g' | sed "s/'//g" | sed 's/"//g')
                 local new_url=$(echo "$old_url" | sed "s/\(.*\):[^:]*$/\1:${branch}/")
                 echo "    OLD: $old_url"
@@ -242,22 +268,20 @@ update_file() {
         # Apply changes based on OS
         if [[ "$OSTYPE" == "darwin"* ]]; then
             # macOS sed requires '' after -i
-            # For image tags: exclude prometheus images from replacement
             [[ "$has_image_tags" -eq 1 ]] && sed -i '' "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
+            [[ "$has_kustomize_images" -eq 1 ]] && sed -i '' "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
             [[ "$has_target_revision" -eq 1 ]] && sed -i '' "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
             [[ "$has_git_branch" -eq 1 ]] && sed -i '' "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
             [[ "$has_github_url" -eq 1 ]] && sed -i '' "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
-            # For VM images: exclude prometheus images from replacement
-            [[ "$has_vm_images" -eq 1 ]] && sed -i '' "/quay.io\/prometheus/!s|\(url:.*docker://[^:]*\):[^\"']*|\1:${branch}|g" "$file"
+            [[ "$has_vm_images" -eq 1 ]] && sed -i '' "/quay.io\/prometheus/!s|\(url:.*docker://[^:]*\):latest|\1:${branch}|g" "$file"
         else
             # Linux sed doesn't need '' after -i
-            # For image tags: exclude prometheus images from replacement
             [[ "$has_image_tags" -eq 1 ]] && sed -i "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
+            [[ "$has_kustomize_images" -eq 1 ]] && sed -i "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
             [[ "$has_target_revision" -eq 1 ]] && sed -i "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
             [[ "$has_git_branch" -eq 1 ]] && sed -i "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
             [[ "$has_github_url" -eq 1 ]] && sed -i "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
-            # For VM images: exclude prometheus images from replacement
-            [[ "$has_vm_images" -eq 1 ]] && sed -i "/quay.io\/prometheus/!s|\(url:.*docker://[^:]*\):[^\"']*|\1:${branch}|g" "$file"
+            [[ "$has_vm_images" -eq 1 ]] && sed -i "/quay.io\/prometheus/!s|\(url:.*docker://[^:]*\):latest|\1:${branch}|g" "$file"
         fi
         print_success "Updated: $file"
     fi
