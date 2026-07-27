@@ -17,7 +17,7 @@ spec:
     spec:
       initContainers:
       - name: init-mysqlservice
-        image: quay.io/prometheus/busybox:latest
+        image: quay.io/ocsci/busybox:latest
         command: ['sh', '-c', "until nslookup mysql.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mysql service; sleep 2; done"]
       containers:
       - name: mysql
