@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: file-uploader-fusion-pvc
+  labels:
+    appname: file-uploader-fusion
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: san-lg3
+  resources:
+    requests:
+      storage: 5Gi
+
+# Made with Bob

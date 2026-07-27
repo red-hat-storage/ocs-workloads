@@ -63,7 +63,7 @@ spec:
           persistentVolumeClaim:
             claimName: vm-2-datadisk-pvc
         - name: cloudinit
-          cloudInitNoCloud:
+          cloudInitConfigDrive:
             secretRef:
               name: vm-2-cloudinit
 

@@ -15,5 +15,5 @@ spec:
   resources:
     requests:
       storage: 512Mi
-  storageClassName: san-lg2-vm
+  storageClassName: san-lg3-vm
 
