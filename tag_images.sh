@@ -210,9 +210,12 @@ declare -a image_current_tags
 temp_file=$(mktemp)
 trap 'rm -f "$temp_file"' EXIT
 
-# Pattern 1: Extract images with :latest tag (container images)
-grep -rh "image:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
-    sed 's/.*image:[[:space:]]*//g' | \
+# Pattern 1: Extract images with :latest tag (container images + kustomize patches)
+{
+    grep -rh "image:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null
+    grep -rh "value:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null
+} | \
+    sed -E 's/.*(image|value):[[:space:]]*//g' | \
     sed 's/[[:space:]]*#.*//g' | \
     sed "s/'//g" | \
     sed 's/"//g' | \
@@ -228,7 +231,6 @@ done
 
 # Pattern 2: Extract VM images with any tag (containerDisk images)
 grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
-    grep -v "quay.io/prometheus" | \
     sort -u | \
 while IFS= read -r line; do
     if [[ -n "$line" ]]; then
@@ -291,7 +293,7 @@ for ((i=0; i<${#image_names[@]}; i++)); do
     if [[ "$DRY_RUN" == "true" ]]; then
         echo "  Would tag: ${image}:${current_tag} → ${image}:${RELEASE_TAG}"
         echo "  Would push: ${image}:${RELEASE_TAG}"
-        ((success_count++))
+        success_count=$((success_count + 1))
     else
         case "$METHOD" in
             skopeo)
@@ -311,11 +313,11 @@ for ((i=0; i<${#image_names[@]}; i++)); do
                     docker://${image}:${current_tag} \
                     docker://${image}:${RELEASE_TAG} 2>&1; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"
-                    ((success_count++))
+                    success_count=$((success_count + 1))
                 else
                     print_error "Failed to tag: ${image}"
                     failed_images+=("$image")
-                    ((failed_count++))
+                    failed_count=$((failed_count + 1))
                 fi
                 ;;
             docker|podman)
@@ -326,11 +328,11 @@ for ((i=0; i<${#image_names[@]}; i++)); do
                    ${METHOD} tag ${image}:${current_tag} ${image}:${RELEASE_TAG} && \
                    ${METHOD} push ${image}:${RELEASE_TAG}; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"
-                    ((success_count++))
+                    success_count=$((success_count + 1))
                 else
                     print_error "Failed to tag: ${image}"
                     failed_images+=("$image")
-                    ((failed_count++))
+                    failed_count=$((failed_count + 1))
                 fi
                 ;;
         esac

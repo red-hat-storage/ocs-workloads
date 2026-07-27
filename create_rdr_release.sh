@@ -191,28 +191,28 @@ run_preflight() {
     done
     if [[ ${#missing_tools[@]} -eq 0 ]]; then
         echo -e "  ${GREEN}[PASS]${NC} Required CLI tools (git, sed, find, grep)"
-        ((pass++))
+        pass=$((pass + 1))
     else
         echo -e "  ${RED}[FAIL]${NC} Required CLI tools — missing: ${missing_tools[*]}"
-        ((fail++))
+        fail=$((fail + 1))
     fi
 
     # 2. Git repository
     if git rev-parse --git-dir &>/dev/null; then
         echo -e "  ${GREEN}[PASS]${NC} Inside a git repository"
-        ((pass++))
+        pass=$((pass + 1))
     else
         echo -e "  ${RED}[FAIL]${NC} Not inside a git repository"
-        ((fail++))
+        fail=$((fail + 1))
     fi
 
     # 3. rdr/ directory exists
     if [[ -d "rdr" ]]; then
         echo -e "  ${GREEN}[PASS]${NC} rdr/ directory exists"
-        ((pass++))
+        pass=$((pass + 1))
     else
         echo -e "  ${RED}[FAIL]${NC} rdr/ directory not found (run from repo root)"
-        ((fail++))
+        fail=$((fail + 1))
     fi
 
     # 4. On master/main branch
@@ -220,19 +220,19 @@ run_preflight() {
     current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
     if [[ "$current_branch" == "master" || "$current_branch" == "main" ]]; then
         echo -e "  ${GREEN}[PASS]${NC} On branch: $current_branch"
-        ((pass++))
+        pass=$((pass + 1))
     else
         echo -e "  ${YELLOW}[WARN]${NC} Not on master/main (current: $current_branch)"
-        ((warn++))
+        warn=$((warn + 1))
     fi
 
     # 5. Remote reachable
     if git ls-remote origin HEAD &>/dev/null; then
         echo -e "  ${GREEN}[PASS]${NC} Remote 'origin' is reachable"
-        ((pass++))
+        pass=$((pass + 1))
     else
         echo -e "  ${RED}[FAIL]${NC} Cannot reach remote 'origin'"
-        ((fail++))
+        fail=$((fail + 1))
     fi
 
     # 6. Branch doesn't already exist (local + remote)
@@ -245,13 +245,13 @@ run_preflight() {
     fi
     if [[ "$branch_exists_local" -eq 0 && "$branch_exists_remote" -eq 0 ]]; then
         echo -e "  ${GREEN}[PASS]${NC} Branch '$branch' does not exist (local or remote)"
-        ((pass++))
+        pass=$((pass + 1))
     else
         local where=""
         [[ "$branch_exists_local" -eq 1 ]] && where="local"
         [[ "$branch_exists_remote" -eq 1 ]] && where="${where:+$where + }remote"
         echo -e "  ${RED}[FAIL]${NC} Branch '$branch' already exists ($where)"
-        ((fail++))
+        fail=$((fail + 1))
     fi
 
     # 7. Container CLI available
@@ -263,10 +263,10 @@ run_preflight() {
     fi
     if [[ -n "$container_cli" ]]; then
         echo -e "  ${GREEN}[PASS]${NC} Container CLI available: $container_cli"
-        ((pass++))
+        pass=$((pass + 1))
     else
         echo -e "  ${YELLOW}[WARN]${NC} No container CLI (podman/docker) found — skipping login check"
-        ((warn++))
+        warn=$((warn + 1))
     fi
 
     # 8. quay.io login
@@ -275,31 +275,31 @@ run_preflight() {
             local user
             user=$($container_cli login --get-login quay.io 2>/dev/null)
             echo -e "  ${GREEN}[PASS]${NC} Logged into quay.io as: $user"
-            ((pass++))
+            pass=$((pass + 1))
         else
             echo -e "  ${RED}[FAIL]${NC} Not logged into quay.io (run: $container_cli login quay.io)"
-            ((fail++))
+            fail=$((fail + 1))
         fi
     else
         echo -e "  ${YELLOW}[WARN]${NC} quay.io login — skipped (no container CLI)"
-        ((warn++))
+        warn=$((warn + 1))
     fi
 
     # 9. skopeo available
     local has_skopeo=0
     if command -v skopeo &>/dev/null; then
         echo -e "  ${GREEN}[PASS]${NC} skopeo is available"
-        ((pass++))
+        pass=$((pass + 1))
         has_skopeo=1
     else
-        echo -e "  ${YELLOW}[WARN]${NC} skopeo not found — skipping image existence checks"
-        ((warn++))
+        echo -e "  ${YELLOW}[WARN]${NC} skopeo not found"
+        warn=$((warn + 1))
     fi
 
-    # 10. Source images exist on quay.io
+    # 10. Verify source images exist on quay.io
     if [[ "$has_skopeo" -eq 1 ]]; then
         echo ""
-        print_info "Verifying source images on quay.io..."
+        print_info "Verifying source images exist on quay.io..."
         local all_images
         all_images=$(
             {
@@ -326,18 +326,21 @@ run_preflight() {
             while IFS= read -r img; do
                 if skopeo inspect "docker://${img}" &>/dev/null; then
                     echo -e "  ${GREEN}[PASS]${NC} Image exists: $img"
-                    ((img_pass++))
+                    img_pass=$((img_pass + 1))
                 else
                     echo -e "  ${RED}[FAIL]${NC} Image NOT found: $img"
-                    ((img_fail++))
+                    img_fail=$((img_fail + 1))
                 fi
             done <<< "$combined"
             pass=$((pass + img_pass))
             fail=$((fail + img_fail))
         else
             echo -e "  ${YELLOW}[WARN]${NC} No images found in rdr/ YAML files"
-            ((warn++))
+            warn=$((warn + 1))
         fi
+    else
+        echo -e "  ${YELLOW}[WARN]${NC} Image existence check — skipped (skopeo not found)"
+        warn=$((warn + 1))
     fi
 
     # Summary
@@ -533,7 +536,7 @@ if [[ "$DRY_RUN" == "true" ]]; then
     updated_count=0
     while IFS= read -r -d '' file; do
         if update_file "$file" "$BRANCH_NAME" "true"; then
-            ((updated_count++))
+            updated_count=$((updated_count + 1))
             echo ""
         fi
     done < <(find rdr -type f \( -name "*.yaml" -o -name "*.yml" \) -print0)
@@ -606,7 +609,7 @@ echo ""
 updated_count=0
 while IFS= read -r -d '' file; do
     if update_file "$file" "$BRANCH_NAME" "false"; then
-        ((updated_count++))
+        updated_count=$((updated_count + 1))
     fi
 done < <(find rdr -type f \( -name "*.yaml" -o -name "*.yml" \) -print0)
 

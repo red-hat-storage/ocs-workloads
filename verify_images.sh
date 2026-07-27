@@ -174,7 +174,12 @@ done < <(
         sed 's/.*image:[[:space:]]*//g' | \
         sed 's/:latest//g'
 
-        # Pattern 2: url: docker:// with any tag (for VM images)
+        # Pattern 2: kustomize value: with :latest tag
+        grep -rh "value:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
+        sed 's/.*value:[[:space:]]*//g' | \
+        sed 's/:latest//g'
+
+        # Pattern 3: url: docker:// with any tag (for VM images)
         grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
         sed 's/.*docker:\/\///g' | \
         sed 's/\(.*\):[^:]*$/\1/'  # Remove tag
@@ -209,11 +214,11 @@ for image in "${images[@]}"; do
 
     if skopeo inspect $SKOPEO_OPTS docker://${full_image} &> /dev/null; then
         print_success "$full_image"
-        ((success_count++))
+        success_count=$((success_count + 1))
     else
         print_error "$full_image (NOT FOUND)"
         missing_images+=("$full_image")
-        ((failed_count++))
+        failed_count=$((failed_count + 1))
 
         # Collect debug information if debug mode is enabled
         if [[ "$DEBUG" == "true" ]]; then
