@@ -210,9 +210,12 @@ declare -a image_current_tags
 temp_file=$(mktemp)
 trap 'rm -f "$temp_file"' EXIT
 
-# Pattern 1: Extract images with :latest tag (container images)
-grep -rh "image:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
-    sed 's/.*image:[[:space:]]*//g' | \
+# Pattern 1: Extract images with :latest tag (container images + kustomize patches)
+{
+    grep -rh "image:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null
+    grep -rh "value:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null
+} | \
+    sed -E 's/.*(image|value):[[:space:]]*//g' | \
     sed 's/[[:space:]]*#.*//g' | \
     sed "s/'//g" | \
     sed 's/"//g' | \
@@ -228,7 +231,6 @@ done
 
 # Pattern 2: Extract VM images with any tag (containerDisk images)
 grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
-    grep -v "quay.io/prometheus" | \
     sort -u | \
 while IFS= read -r line; do
     if [[ -n "$line" ]]; then
@@ -282,6 +284,8 @@ fi
 success_count=0
 failed_count=0
 declare -a failed_images
+declare -a tagged_report
+declare -a not_tagged_report
 
 for ((i=0; i<${#image_names[@]}; i++)); do
     image="${image_names[$i]}"
@@ -291,7 +295,8 @@ for ((i=0; i<${#image_names[@]}; i++)); do
     if [[ "$DRY_RUN" == "true" ]]; then
         echo "  Would tag: ${image}:${current_tag} → ${image}:${RELEASE_TAG}"
         echo "  Would push: ${image}:${RELEASE_TAG}"
-        ((success_count++))
+        success_count=$((success_count + 1))
+        tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|DRY-RUN")
     else
         case "$METHOD" in
             skopeo)
@@ -311,11 +316,13 @@ for ((i=0; i<${#image_names[@]}; i++)); do
                     docker://${image}:${current_tag} \
                     docker://${image}:${RELEASE_TAG} 2>&1; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"
-                    ((success_count++))
+                    success_count=$((success_count + 1))
+                    tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|TAGGED")
                 else
                     print_error "Failed to tag: ${image}"
                     failed_images+=("$image")
-                    ((failed_count++))
+                    failed_count=$((failed_count + 1))
+                    not_tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|FAILED")
                 fi
                 ;;
             docker|podman)
@@ -326,11 +333,13 @@ for ((i=0; i<${#image_names[@]}; i++)); do
                    ${METHOD} tag ${image}:${current_tag} ${image}:${RELEASE_TAG} && \
                    ${METHOD} push ${image}:${RELEASE_TAG}; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"
-                    ((success_count++))
+                    success_count=$((success_count + 1))
+                    tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|TAGGED")
                 else
                     print_error "Failed to tag: ${image}"
                     failed_images+=("$image")
-                    ((failed_count++))
+                    failed_count=$((failed_count + 1))
+                    not_tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|FAILED")
                 fi
                 ;;
         esac
@@ -341,11 +350,30 @@ done
 # Print summary
 echo ""
 echo "=========================================="
-print_info "Summary"
+print_info "Release Tagging Report"
 echo "=========================================="
-echo "Total images: $total_images"
-echo "Successfully tagged: $success_count"
-echo "Failed: $failed_count"
+echo ""
+printf "  %-55s %-15s %s\n" "SOURCE" "TARGET TAG" "STATUS"
+printf "  %-55s %-15s %s\n" "------" "----------" "------"
+
+if [[ ${#tagged_report[@]} -gt 0 ]]; then
+    for entry in "${tagged_report[@]}"; do
+        IFS='|' read -r src dst status <<< "$entry"
+        target_tag=$(echo "$dst" | sed 's/.*://')
+        printf "  ${GREEN}%-55s %-15s %s${NC}\n" "$src" ":$target_tag" "$status"
+    done
+fi
+
+if [[ ${#not_tagged_report[@]} -gt 0 ]]; then
+    for entry in "${not_tagged_report[@]}"; do
+        IFS='|' read -r src dst status <<< "$entry"
+        target_tag=$(echo "$dst" | sed 's/.*://')
+        printf "  ${RED}%-55s %-15s %s${NC}\n" "$src" ":$target_tag" "$status"
+    done
+fi
+
+echo ""
+echo "  Total: $total_images | Tagged: $success_count | Failed: $failed_count"
 echo ""
 
 if [[ $failed_count -gt 0 ]]; then
@@ -364,8 +392,8 @@ else
     print_success "All images tagged and pushed successfully!"
     echo ""
     print_info "Next steps:"
-    echo "  1. Verify images in Quay.io web interface"
-    echo "  2. Run: ./create_rdr_release.sh -b $RELEASE_TAG"
+    echo "  1. Verify images: ./verify_images.sh -t $RELEASE_TAG"
+    echo "  2. Create release: ./create_rdr_release.sh -b $RELEASE_TAG"
 fi
 
 echo ""

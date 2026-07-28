@@ -174,7 +174,12 @@ done < <(
         sed 's/.*image:[[:space:]]*//g' | \
         sed 's/:latest//g'
 
-        # Pattern 2: url: docker:// with any tag (for VM images)
+        # Pattern 2: kustomize value: with :latest tag
+        grep -rh "value:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
+        sed 's/.*value:[[:space:]]*//g' | \
+        sed 's/:latest//g'
+
+        # Pattern 3: url: docker:// with any tag (for VM images)
         grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
         sed 's/.*docker:\/\///g' | \
         sed 's/\(.*\):[^:]*$/\1/'  # Remove tag
@@ -203,17 +208,21 @@ success_count=0
 failed_count=0
 declare -a missing_images
 declare -a missing_details
+declare -a verified_report
+declare -a not_verified_report
 
 for image in "${images[@]}"; do
     full_image="${image}:${RELEASE_TAG}"
 
     if skopeo inspect $SKOPEO_OPTS docker://${full_image} &> /dev/null; then
         print_success "$full_image"
-        ((success_count++))
+        success_count=$((success_count + 1))
+        verified_report+=("${full_image}|FOUND")
     else
         print_error "$full_image (NOT FOUND)"
         missing_images+=("$full_image")
-        ((failed_count++))
+        failed_count=$((failed_count + 1))
+        not_verified_report+=("${full_image}|NOT FOUND")
 
         # Collect debug information if debug mode is enabled
         if [[ "$DEBUG" == "true" ]]; then
@@ -242,11 +251,28 @@ done
 # Print summary
 echo ""
 echo "=========================================="
-print_info "Verification Summary"
+print_info "Verification Report"
 echo "=========================================="
-echo "Total images checked: $total_images"
-echo "Found: $success_count"
-echo "Missing: $failed_count"
+echo ""
+printf "  %-55s %s\n" "IMAGE" "STATUS"
+printf "  %-55s %s\n" "-----" "------"
+
+if [[ ${#verified_report[@]} -gt 0 ]]; then
+    for entry in "${verified_report[@]}"; do
+        IFS='|' read -r img status <<< "$entry"
+        printf "  ${GREEN}%-55s %s${NC}\n" "$img" "$status"
+    done
+fi
+
+if [[ ${#not_verified_report[@]} -gt 0 ]]; then
+    for entry in "${not_verified_report[@]}"; do
+        IFS='|' read -r img status <<< "$entry"
+        printf "  ${RED}%-55s %s${NC}\n" "$img" "$status"
+    done
+fi
+
+echo ""
+echo "  Total: $total_images | Found: $success_count | Missing: $failed_count"
 echo ""
 
 if [[ $failed_count -gt 0 ]]; then
