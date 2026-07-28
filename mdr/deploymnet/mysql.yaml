@@ -14,7 +14,7 @@ spec:
         workload : mysql
     spec:
       containers:
-      - image: quay.io/prsurve/mysql:latest
+      - image: quay.io/ocsci/mysql:latest
         name: mysql
         env:
           # Use secret in real usage

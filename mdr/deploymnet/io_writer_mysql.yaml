@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: fedora
-        image: quay.io/prsurve/mysql_data_write:latest
+        image: quay.io/ocsci/mysql_data_write:latest
         command: ['/usr/bin/python3', '/script/db.py']
         imagePullPolicy: Always
         env:
