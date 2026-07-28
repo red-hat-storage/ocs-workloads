@@ -10,7 +10,7 @@ patches:
         value: {}
       - op: replace
         path: /spec/template/spec/containers/0/image
-        value: quay.io/ocsci/busybox:latest
+        value: quay.io/ocsci/busybox:release-4.22
       - op: replace
         path: /spec/template/spec/containers/0/command
         value:  ['sh', '-c', 'while true; do echo $(date) | tee -a /mnt/test/outfile; sync; sleep 2; done']

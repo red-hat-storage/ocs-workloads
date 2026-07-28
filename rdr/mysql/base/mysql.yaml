@@ -17,7 +17,7 @@ spec:
         workload: mysql
     spec:
       containers:
-      - image: quay.io/ocsci/mysql:latest
+      - image: quay.io/ocsci/mysql:release-4.22
         name: mysql
         livenessProbe:
           exec:

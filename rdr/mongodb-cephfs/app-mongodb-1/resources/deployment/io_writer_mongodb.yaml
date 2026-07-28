@@ -16,11 +16,11 @@ spec:
     spec:
       initContainers:
       - name: init-mongodbservice
-        image: quay.io/ocsci/busybox:latest
+        image: quay.io/ocsci/busybox:release-4.22
         command: ['sh', '-c', "until nslookup mongodb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mongodb service; sleep 2; done"]
       containers:
       - name: mongodb
-        image: quay.io/ocsci/mongodb_data_write:latest
+        image: quay.io/ocsci/mongodb_data_write:release-4.22
         command: ['/usr/bin/python3', '/script/db.py']
         imagePullPolicy: Always
         env:

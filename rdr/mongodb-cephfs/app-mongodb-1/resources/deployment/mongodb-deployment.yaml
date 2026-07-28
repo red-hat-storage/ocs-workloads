@@ -16,7 +16,7 @@ spec:
         app: mongo
     spec:
       containers:
-      - image: quay.io/ocsci/mongodb_rdr:latest
+      - image: quay.io/ocsci/mongodb_rdr:release-4.22
         name: mongo
         args: ["--dbpath","/data/db"]
         livenessProbe:
