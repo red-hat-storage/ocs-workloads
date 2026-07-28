@@ -28,33 +28,33 @@ The following **8 container images** are used in the `rdr/` workloads and must b
 
 ### Images in quay.io/prsurve/ (5 images)
 
-4. **quay.io/prsurve/mongodb_rdr**
+4. **quay.io/ocsci/mongodb_rdr**
    - Current: `quay.io/ocsci/mongodb_rdr:latest`
-   - Release: `quay.io/prsurve/mongodb_rdr:release-4.17`
+   - Release: `quay.io/ocsci/mongodb_rdr:release-4.17`
    - Used in: MongoDB workloads
    - Files: mongodb and mongodb-cephfs deployment files
 
-5. **quay.io/prsurve/mongodb_data_write**
+5. **quay.io/ocsci/mongodb_data_write**
    - Current: `quay.io/ocsci/mongodb_data_write:latest`
-   - Release: `quay.io/prsurve/mongodb_data_write:release-4.17`
+   - Release: `quay.io/ocsci/mongodb_data_write:release-4.17`
    - Used in: MongoDB IO writer workloads
    - Files: mongodb io_writer files
 
-6. **quay.io/prsurve/mysql**
+6. **quay.io/ocsci/mysql**
    - Current: `quay.io/ocsci/mysql:latest`
-   - Release: `quay.io/prsurve/mysql:release-4.17`
+   - Release: `quay.io/ocsci/mysql:release-4.17`
    - Used in: MySQL workloads
    - Files: mysql deployment files
 
-7. **quay.io/prsurve/mysql_data_write**
+7. **quay.io/ocsci/mysql_data_write**
    - Current: `quay.io/ocsci/mysql_data_write:latest`
-   - Release: `quay.io/prsurve/mysql_data_write:release-4.17`
+   - Release: `quay.io/ocsci/mysql_data_write:release-4.17`
    - Used in: MySQL IO writer workloads
    - Files: mysql io_writer files
 
-8. **quay.io/prsurve/filebrowser_data_write**
+8. **quay.io/ocsci/filebrowser_data_write**
    - Current: `quay.io/ocsci/filebrowser_data_write:latest`
-   - Release: `quay.io/prsurve/filebrowser_data_write:release-4.17`
+   - Release: `quay.io/ocsci/filebrowser_data_write:release-4.17`
    - Used in: File browser client workloads
    - Files: file-browser deployment files
 
@@ -123,11 +123,11 @@ For release **release-4.17**, tag and push these images:
 - [ ] `quay.io/ocsci/rdr-ocs-workload:release-4.17`
 - [ ] `quay.io/ocsci/filebrowser:release-4.17`
 - [ ] `quay.io/ocsci/cirros-dd:release-4.17`
-- [ ] `quay.io/prsurve/mongodb_rdr:release-4.17`
-- [ ] `quay.io/prsurve/mongodb_data_write:release-4.17`
-- [ ] `quay.io/prsurve/mysql:release-4.17`
-- [ ] `quay.io/prsurve/mysql_data_write:release-4.17`
-- [ ] `quay.io/prsurve/filebrowser_data_write:release-4.17`
+- [ ] `quay.io/ocsci/mongodb_rdr:release-4.17`
+- [ ] `quay.io/ocsci/mongodb_data_write:release-4.17`
+- [ ] `quay.io/ocsci/mysql:release-4.17`
+- [ ] `quay.io/ocsci/mysql_data_write:release-4.17`
+- [ ] `quay.io/ocsci/filebrowser_data_write:release-4.17`
 
 ---
 
@@ -200,11 +200,11 @@ images=(
   "quay.io/ocsci/rdr-ocs-workload"
   "quay.io/ocsci/filebrowser"
   "quay.io/ocsci/cirros-dd"
-  "quay.io/prsurve/mongodb_rdr"
-  "quay.io/prsurve/mongodb_data_write"
-  "quay.io/prsurve/mysql"
-  "quay.io/prsurve/mysql_data_write"
-  "quay.io/prsurve/filebrowser_data_write"
+  "quay.io/ocsci/mongodb_rdr"
+  "quay.io/ocsci/mongodb_data_write"
+  "quay.io/ocsci/mysql"
+  "quay.io/ocsci/mysql_data_write"
+  "quay.io/ocsci/filebrowser_data_write"
 )
 
 for image in "${images[@]}"; do
@@ -230,11 +230,11 @@ images=(
   "quay.io/ocsci/rdr-ocs-workload"
   "quay.io/ocsci/filebrowser"
   "quay.io/ocsci/cirros-dd"
-  "quay.io/prsurve/mongodb_rdr"
-  "quay.io/prsurve/mongodb_data_write"
-  "quay.io/prsurve/mysql"
-  "quay.io/prsurve/mysql_data_write"
-  "quay.io/prsurve/filebrowser_data_write"
+  "quay.io/ocsci/mongodb_rdr"
+  "quay.io/ocsci/mongodb_data_write"
+  "quay.io/ocsci/mysql"
+  "quay.io/ocsci/mysql_data_write"
+  "quay.io/ocsci/filebrowser_data_write"
 )
 
 for image in "${images[@]}"; do
@@ -262,11 +262,11 @@ RELEASE_TAG="release-4.17"
 skopeo inspect docker://quay.io/ocsci/rdr-ocs-workload:${RELEASE_TAG}
 skopeo inspect docker://quay.io/ocsci/filebrowser:${RELEASE_TAG}
 skopeo inspect docker://quay.io/ocsci/cirros-dd:${RELEASE_TAG}
-skopeo inspect docker://quay.io/prsurve/mongodb_rdr:${RELEASE_TAG}
-skopeo inspect docker://quay.io/prsurve/mongodb_data_write:${RELEASE_TAG}
-skopeo inspect docker://quay.io/prsurve/mysql:${RELEASE_TAG}
-skopeo inspect docker://quay.io/prsurve/mysql_data_write:${RELEASE_TAG}
-skopeo inspect docker://quay.io/prsurve/filebrowser_data_write:${RELEASE_TAG}
+skopeo inspect docker://quay.io/ocsci/mongodb_rdr:${RELEASE_TAG}
+skopeo inspect docker://quay.io/ocsci/mongodb_data_write:${RELEASE_TAG}
+skopeo inspect docker://quay.io/ocsci/mysql:${RELEASE_TAG}
+skopeo inspect docker://quay.io/ocsci/mysql_data_write:${RELEASE_TAG}
+skopeo inspect docker://quay.io/ocsci/filebrowser_data_write:${RELEASE_TAG}
 ```
 
 Or check manually in Quay.io web interface:
