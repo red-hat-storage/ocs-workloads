@@ -65,7 +65,7 @@ DESCRIPTION:
       - quay.io/ocsci/rdr-ocs-workload:latest → :release-4.17
       - quay.io/ocsci/filebrowser:latest → :release-4.17
       - quay.io/ocsci/cirros-dd:0.6.3 → :release-4.17 (VM image)
-      - quay.io/prsurve/mongodb_rdr:latest → :release-4.17
+      - quay.io/ocsci/mongodb_rdr:latest → :release-4.17
       - And more...
 
 NOTES:

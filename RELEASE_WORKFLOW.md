@@ -40,11 +40,11 @@ Currently detected (example):
 - `quay.io/ocsci/rdr-ocs-workload:latest` → `:release-4.17`
 - `quay.io/ocsci/filebrowser:latest` → `:release-4.17`
 - `quay.io/ocsci/cirros-dd:0.6.3` → `:release-4.17` (VM image)
-- `quay.io/prsurve/mongodb_rdr:latest` → `:release-4.17`
-- `quay.io/prsurve/mongodb_data_write:latest` → `:release-4.17`
-- `quay.io/prsurve/mysql:latest` → `:release-4.17`
-- `quay.io/prsurve/mysql_data_write:latest` → `:release-4.17`
-- `quay.io/prsurve/filebrowser_data_write:latest` → `:release-4.17`
+- `quay.io/ocsci/mongodb_rdr:latest` → `:release-4.17`
+- `quay.io/ocsci/mongodb_data_write:latest` → `:release-4.17`
+- `quay.io/ocsci/mysql:latest` → `:release-4.17`
+- `quay.io/ocsci/mysql_data_write:latest` → `:release-4.17`
+- `quay.io/ocsci/filebrowser_data_write:latest` → `:release-4.17`
 
 **Note:**
 - New images added to the `rdr/` directory are automatically detected - no script updates needed!

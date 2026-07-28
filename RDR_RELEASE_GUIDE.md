@@ -139,7 +139,7 @@ skopeo login quay.io
   - quay.io/ocsci/cirros-dd:0.6.3 → quay.io/ocsci/cirros-dd:release-4.17
   - quay.io/ocsci/filebrowser:latest → quay.io/ocsci/filebrowser:release-4.17
   - quay.io/ocsci/rdr-ocs-workload:latest → quay.io/ocsci/rdr-ocs-workload:release-4.17
-  - quay.io/prsurve/filebrowser_data_write:latest → ...
+  - quay.io/ocsci/filebrowser_data_write:latest → ...
   [and more...]
 ```
 
@@ -321,12 +321,12 @@ value: ["wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/re
 
 The script updates tags for all images found in `rdr/` folder, including:
 - `quay.io/ocsci/rdr-ocs-workload:latest`
-- `quay.io/prsurve/mongodb_rdr:latest`
-- `quay.io/prsurve/mysql:latest`
-- `quay.io/prsurve/filebrowser_data_write:latest`
+- `quay.io/ocsci/mongodb_rdr:latest`
+- `quay.io/ocsci/mysql:latest`
+- `quay.io/ocsci/filebrowser_data_write:latest`
 - `quay.io/ocsci/filebrowser:latest`
-- `quay.io/prsurve/mongodb_data_write:latest`
-- `quay.io/prsurve/mysql_data_write:latest`
+- `quay.io/ocsci/mongodb_data_write:latest`
+- `quay.io/ocsci/mysql_data_write:latest`
 - `quay.io/prometheus/busybox:latest`
 - And any other images with `:latest` tag
 
