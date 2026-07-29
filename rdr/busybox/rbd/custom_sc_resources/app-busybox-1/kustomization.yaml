@@ -1,0 +1,21 @@
+resources:
+- ../../../base
+patches:
+  - target:
+      kind: Deployment
+      labelSelector: workloadpattern=simple_io
+    patch: |-
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app_1
+  - target:
+      kind: PersistentVolumeClaim
+      labelSelector: appname=busybox_app1
+    patch: |-
+      - op: replace
+        path: /spec/storageClassName
+        value: rbd-custom-sc
+      - op: replace
+        path: /metadata/labels/appname
+        value: busybox_app1_rbd
+
