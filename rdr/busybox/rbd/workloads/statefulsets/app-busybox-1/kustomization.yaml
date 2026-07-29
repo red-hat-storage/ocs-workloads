@@ -1,0 +1,11 @@
+resources:
+- ../../../../base/statefulsets
+
+patches:
+- target:
+    kind: StatefulSet
+    name: busybox-sfs-.*
+  patch: |-
+    - op: replace
+      path: /spec/volumeClaimTemplates/0/spec/storageClassName
+      value: ocs-storagecluster-ceph-rbd

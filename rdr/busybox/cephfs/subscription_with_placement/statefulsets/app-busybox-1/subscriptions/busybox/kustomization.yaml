@@ -1,0 +1,7 @@
+namespace: busybox-sfs-1-cephfs
+resources:
+- namespace.yaml
+- placement.yaml
+- subscription.yaml
+- app.yaml
+- managedclustersetbinding.yaml

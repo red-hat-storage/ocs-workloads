@@ -1,0 +1,6 @@
+resources:
+- busybox-sfs-1.yaml
+- busybox-sfs-2.yaml
+- busybox-sfs-3.yaml
+- busybox-sfs-4.yaml
+- busybox-sfs-5.yaml
