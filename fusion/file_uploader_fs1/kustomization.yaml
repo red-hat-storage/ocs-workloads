@@ -1,0 +1,8 @@
+---
+resources:
+- file-uploader-pvc.yaml
+- file-uploader-pod.yaml
+- file-uploader-service.yaml
+- file-uploader-route.yaml
+
+# Made with Bob

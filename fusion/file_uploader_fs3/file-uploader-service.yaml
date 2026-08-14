@@ -1,0 +1,18 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: file-uploader-fusion
+  labels:
+    appname: file-uploader-fusion
+spec:
+  ports:
+  - name: 8080-tcp
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: ClusterIP
+  selector:
+    workload: file-uploader-fusion
+
+# Made with Bob

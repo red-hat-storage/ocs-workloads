@@ -1,0 +1,8 @@
+---
+resources:
+- secret.yaml
+- vm-1-pvc.yaml
+- vm-1-source.yaml
+- vm-workload-1.yaml
+
+# Made with Bob

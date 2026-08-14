@@ -1,0 +1,22 @@
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: file-uploader-fusion
+  labels:
+    appname: file-uploader-fusion
+  annotations:
+    haproxy.router.openshift.io/balance: roundrobin
+    haproxy.router.openshift.io/disable_cookies: 'true'
+spec:
+  to:
+    kind: Service
+    name: file-uploader-fusion
+    weight: 100
+  port:
+    targetPort: 8080-tcp
+  tls:
+    termination: edge
+  wildcardPolicy: None
+
+# Made with Bob
