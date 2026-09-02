@@ -8,7 +8,7 @@ metadata:
 spec:
   accessModes:
   - ReadWriteOnce
-  storageClassName: san-fs3
+  storageClassName: san-lg1
   resources:
     requests:
       storage: 5Gi
