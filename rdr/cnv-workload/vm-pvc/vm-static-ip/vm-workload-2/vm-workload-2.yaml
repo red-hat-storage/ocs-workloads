@@ -1,0 +1,82 @@
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-static-ip-workload-2
+  namespace: vm-ip-translation-test
+  labels:
+    appname: vm-cloudinit-static-ip
+    ramendr.openshift.io/k8s-resource-selector: vm-cloudinit-static-ip
+spec:
+  running: true
+  template:
+    metadata:
+      annotations:
+        vm.kubevirt.io/flavor: small
+        vm.kubevirt.io/os: fedora
+        vm.kubevirt.io/workload: server
+        # RHSTOR-8082: pin the IP on the Primary UDN interface. OVN-K8s IPAM
+        # honours this and creates IPAMClaim vm-static-ip-workload-2.vm-network
+        network.kubevirt.io/addresses: '{"vm-network": ["192.168.1.12"]}'
+      labels:
+        kubevirt.io/size: small
+        appname: kubevirt
+    spec:
+      domain:
+        cpu:
+          cores: 1
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - name: rootdisk
+              disk:
+                bus: virtio
+            - name: cloudinit
+              disk: {}
+          # Single interface on the namespace's Primary UDN (vm-network).
+          # A Primary UDN replaces the default pod network, so this is the
+          # pod network - masquerade is not used.
+          interfaces:
+            - name: vm-network
+              bridge: {}
+          networkInterfaceMultiqueue: true
+          rng: {}
+        features:
+          acpi: {}
+        machine:
+          type: pc-q35-rhel8.6.0
+        resources:
+          requests:
+            # Match cirros-source memory requirements.
+            # See https://github.com/cirros-dev/cirros/issues/53
+            memory: 256Mi
+      evictionStrategy: LiveMigrate
+      networks:
+        - name: vm-network
+          pod: {}
+      terminationGracePeriodSeconds: 180
+      accessCredentials:
+        - sshPublicKey:
+            source:
+              secret:
+                secretName: vm-secret-1
+            propagationMethod:
+              configDrive: {}
+      volumes:
+        - name: rootdisk
+          persistentVolumeClaim:
+            claimName: vm-2-pvc
+        - name: cloudinit
+          cloudInitConfigDrive:
+            userData: |-
+              #user-config
+              user: cirros
+              password: gocubsgo
+              chpasswd: { expire: False }
+            # DHCP so the guest picks up the OVN-assigned IP after failover
+            networkData: |-
+              version: 2
+              ethernets:
+                eth0:
+                  dhcp4: true

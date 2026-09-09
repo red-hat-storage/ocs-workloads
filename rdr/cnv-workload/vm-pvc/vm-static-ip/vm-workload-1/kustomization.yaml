@@ -1,0 +1,9 @@
+---
+resources:
+  - vm-1-source.yaml
+  - vm-1-pvc.yaml
+  - vm-workload-1.yaml
+commonLabels:
+  appname: kubevirt
+generatorOptions:
+  disableNameSuffixHash: true
