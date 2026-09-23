@@ -1,22 +1,20 @@
 name: "Refresh Image Digests"
 
-# Refresh the pinned image digests in rdr/ kustomization images: blocks.
-# Re-resolves each `newTag` to its current manifest-list digest and, if anything
-# changed, opens a PR back against the SAME branch it ran on. Merging that PR is
-# a deliberate, reviewable "adopt the newer builds" action.
+# Refresh the pinned image digests in rdr/ kustomization images: blocks on the
+# DEFAULT branch only (master/main). Re-resolves each `newTag: latest` to its
+# current manifest-list digest and, if anything changed, opens a review PR.
 #
 # Branch model:
-#   - schedule (nightly) only ever runs on the default branch (master), where
-#     newTag: latest -> pins track the newest builds.
-#   - release-* branches are frozen by design and get NO automatic runs. To
-#     deliberately re-pin a release branch (e.g. a workload security fix),
-#     manually dispatch this workflow with that branch selected; it resolves
-#     from that branch's newTag (release-X) and opens a PR against it.
+#   - master/main: pins roll forward to the newest builds via this workflow.
+#   - release-* branches: FROZEN. This workflow refuses to run on them — the job
+#     is guarded to the default branch, so even a manual dispatch on a release
+#     branch is skipped. A release keeps deploying the exact digest it was cut
+#     with. To change a release pin, edit it in a normal PR to that branch.
 
 on:
   schedule:
-    - cron: "0 3 * * *"   # 03:00 UTC daily (default branch only)
-  workflow_dispatch: {}   # manual: pick any branch (e.g. a release-* branch)
+    - cron: "0 3 * * *"   # 03:00 UTC daily (schedule only fires on default branch)
+  workflow_dispatch: {}   # manual runs on non-default branches are skipped (see job if:)
 
 permissions:
   contents: write
@@ -25,6 +23,9 @@ permissions:
 jobs:
   refresh-digests:
     runs-on: ubuntu-latest
+    # Hard guard: only ever run on the default branch (master/main). A manual
+    # dispatch on a release-* branch is skipped, keeping release pins frozen.
+    if: github.ref_name == github.event.repository.default_branch
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,19 +47,17 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v6
         with:
-          # Open the PR back against whatever branch this run was triggered on,
-          # and namespace the bot branch per base so branches don't collide.
-          branch: bot/image-digests-${{ github.ref_name }}
-          base: ${{ github.ref_name }}
-          commit-message: "chore: refresh pinned image digests (${{ github.ref_name }})"
-          title: "chore: refresh pinned image digests (${{ github.ref_name }})"
+          branch: bot/image-digests
+          base: ${{ github.event.repository.default_branch }}
+          commit-message: "chore: refresh pinned image digests"
+          title: "chore: refresh pinned image digests"
           body: |
             Automated refresh of pinned container image digests in `rdr/`
-            kustomization `images:` blocks on `${{ github.ref_name }}`.
+            kustomization `images:` blocks on the default branch.
 
             Each `newTag` was re-resolved to its current manifest-list digest via
             `hack/update_digests.sh`. Review the digest changes before merging —
-            merging adopts the newer builds on this branch.
+            merging adopts the newer builds.
 
             🤖 Generated with [Claude Code](https://claude.com/claude-code)
           labels: |
