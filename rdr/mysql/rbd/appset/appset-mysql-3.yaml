@@ -21,7 +21,7 @@ spec:
       source:
         repoURL: https://github.com/red-hat-storage/ocs-workloads.git
         targetRevision: master
-        path: rdr/busybox/rbd/workloads/app-mysql-3
+        path: rdr/mysql/rbd/workloads/app-mysql-3
       destination:
         namespace: appset-mysql-3
         server: "{{server}}"

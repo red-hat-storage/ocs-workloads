@@ -1,0 +1,58 @@
+name: "Refresh Image Digests"
+
+# Nightly (and on-demand) refresh of the pinned image digests in rdr/
+# kustomization images: blocks. Re-resolves each `newTag` to its current
+# manifest-list digest and, if anything changed, opens a PR against the default
+# branch on the bot/image-digests branch. Merging that PR is a deliberate,
+# reviewable "advance master to the latest builds" action.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # 03:00 UTC daily
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh-digests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install skopeo and yq
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+          sudo curl -fsSL -o /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          skopeo --version
+          yq --version
+
+      - name: Refresh digests
+        run: hack/update_digests.sh
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: bot/image-digests
+          base: ${{ github.event.repository.default_branch }}
+          commit-message: "chore: refresh pinned image digests"
+          title: "chore: refresh pinned image digests"
+          body: |
+            Automated refresh of pinned container image digests in `rdr/`
+            kustomization `images:` blocks.
+
+            Each `newTag` was re-resolved to its current manifest-list digest via
+            `hack/update_digests.sh`. Review the digest changes before merging —
+            merging advances the workloads to the newest builds.
+
+            🤖 Generated with [Claude Code](https://claude.com/claude-code)
+          labels: |
+            automated
+            image-digests
+          delete-branch: true

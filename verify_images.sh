@@ -115,6 +115,15 @@ if ! command -v skopeo &> /dev/null; then
     exit 1
 fi
 
+# Check if yq is available (needed to read pinned digests from kustomize images: blocks)
+if ! command -v yq &> /dev/null; then
+    print_error "yq is not installed or not in PATH"
+    print_info "Install yq (mikefarah/yq v4) to read pinned digests:"
+    echo "  - macOS: brew install yq"
+    echo "  - Linux: https://github.com/mikefarah/yq/#install"
+    exit 1
+fi
+
 # Validate authfile if provided
 if [[ -n "$AUTHFILE" ]]; then
     if [[ ! -f "$AUTHFILE" ]]; then
@@ -162,35 +171,27 @@ fi
 # Auto-detect all images from rdr/ directory
 print_info "Scanning rdr/ directory for container images..."
 
-# Extract all unique images, excluding external images
-# Handles both "image:" fields and "url: docker://" fields
+# Build the pinned image -> digest map (source of truth), from:
+#   - kustomize images: blocks (name|sha256:...)
+#   - digest-pinned VM url: fields (name@sha256:... -> name|sha256:...)
+# This works on master (newTag: latest) and on release branches (newTag: release-X),
+# since we read .digest regardless of the tag.
+digest_tmp=$(mktemp)
+trap 'rm -f "$digest_tmp"' EXIT
+{
+    find rdr -name kustomization.yaml -print0 2>/dev/null | while IFS= read -r -d '' f; do
+        yq eval '.images[]? | .name + "|" + .digest' "$f" 2>/dev/null
+    done
+    grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
+        sed 's/.*docker:\/\///g' | sed 's/[[:space:]]*#.*//g' | sed "s/'//g" | sed 's/"//g' | \
+        grep '@sha256:' | sed -E 's/@(sha256:[0-9a-f]+)$/|\1/'
+} | grep -v "^$" | grep -v "quay.io/prometheus" | sort -u > "$digest_tmp"
+
+# Names for the existence check
 declare -a images
-while IFS= read -r image; do
-    images+=("$image")
-done < <(
-    {
-        # Pattern 1: image: with :latest tag
-        grep -rh "image:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
-        sed 's/.*image:[[:space:]]*//g' | \
-        sed 's/:latest//g'
-
-        # Pattern 2: kustomize value: with :latest tag
-        grep -rh "value:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
-        sed 's/.*value:[[:space:]]*//g' | \
-        sed 's/:latest//g'
-
-        # Pattern 3: url: docker:// with any tag (for VM images)
-        grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
-        sed 's/.*docker:\/\///g' | \
-        sed 's/\(.*\):[^:]*$/\1/'  # Remove tag
-    } | \
-    sed 's/[[:space:]]*#.*//g' | \
-    sed "s/'//g" | \
-    sed 's/"//g' | \
-    grep -v "^$" | \
-    grep -v "quay.io/prometheus" | \
-    sort -u
-)
+while IFS='|' read -r name _; do
+    [[ -n "$name" ]] && images+=("$name")
+done < <(cut -d'|' -f1 "$digest_tmp" | sort -u)
 
 total_images=${#images[@]}
 
@@ -416,6 +417,47 @@ if [[ $failed_count -gt 0 ]]; then
     exit 1
 fi
 
+# --- Digest equality check: :RELEASE_TAG must resolve to the pinned digest ---
+# The pinned digest (from kustomize images: blocks and digest-pinned VM url: fields)
+# is what master tested. This guards against :release-X pointing at a different build.
+echo ""
+echo "=========================================="
+print_info "Digest Equality Check"
+echo "=========================================="
+echo ""
+
+# --raw digest must be computed WITHOUT --override-arch so we compare the
+# manifest-list (index) digest, matching how the pins were resolved.
+# Reuses the name|digest map ($digest_tmp) built during detection above.
+RAW_OPTS=""
+[[ -n "$AUTHFILE" ]] && RAW_OPTS="--authfile $AUTHFILE"
+
+digest_mismatch=0
+digest_checked=0
+while IFS='|' read -r name want; do
+    [[ -z "$name" || -z "$want" ]] && continue
+    digest_checked=$((digest_checked + 1))
+    got="sha256:$(skopeo inspect --raw $RAW_OPTS "docker://${name}:${RELEASE_TAG}" 2>/dev/null | sha256sum | cut -d' ' -f1)"
+    if [[ "$got" == "$want" ]]; then
+        print_success "${name}:${RELEASE_TAG} matches pinned ${want}"
+    else
+        print_error "${name}:${RELEASE_TAG} digest mismatch"
+        echo "    pinned: $want"
+        echo "    actual: $got"
+        digest_mismatch=1
+    fi
+done < "$digest_tmp"
+
+echo ""
+if [[ "$digest_mismatch" -eq 1 ]]; then
+    print_error "One or more :${RELEASE_TAG} tags do not match the pinned digest!"
+    print_info "Re-run tagging from the pinned digests: ./tag_images.sh -t $RELEASE_TAG"
+    echo ""
+    exit 1
+fi
+print_success "All $digest_checked release tag(s) resolve to the pinned digest"
+
+echo ""
 print_success "All required images exist in Quay!"
 echo ""
 print_info "You can now proceed with creating the release branch:"

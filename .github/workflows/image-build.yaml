@@ -1,0 +1,105 @@
+name: "Build & Pin Busybox Image"
+
+# Builds the busybox workload image from rdr/container_image/busybox/Dockerfile,
+# pushes it to quay.io, then re-resolves the digest pins and opens a PR. A
+# maintainer adopts the new build by reviewing and merging that PR — the digest
+# pin (not the moving :latest tag) is what the workloads actually deploy.
+#
+# Requires two repository secrets (a quay.io robot account with push access to
+# quay.io/ocsci/rdr-ocs-workload):
+#   QUAY_USERNAME  - robot account name, e.g. ocsci+ci
+#   QUAY_PASSWORD  - robot account token
+# The workflow no-ops on push if the secrets are absent, so it is safe to merge
+# before they are configured.
+#
+# Only the busybox image is built here. The cnv/cirros-dd image needs a
+# privileged qemu-nbd build (see rdr/container_image/cnv/build.sh) and the other
+# workload images are built in their own repositories; all of those are kept
+# current by the nightly Refresh Image Digests workflow instead.
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 4 * * 1"   # 04:00 UTC every Monday
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  IMAGE: quay.io/ocsci/rdr-ocs-workload
+
+jobs:
+  build-and-pin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check registry secrets
+        id: secrets
+        run: |
+          if [[ -n "${{ secrets.QUAY_USERNAME }}" && -n "${{ secrets.QUAY_PASSWORD }}" ]]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::QUAY_USERNAME/QUAY_PASSWORD not set — skipping build."
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.secrets.outputs.present == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Quay.io
+        if: steps.secrets.outputs.present == 'true'
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Build and push :latest
+        if: steps.secrets.outputs.present == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: rdr/container_image/busybox/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}:latest
+          provenance: false
+
+      - name: Install skopeo and yq
+        if: steps.secrets.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+          sudo curl -fsSL -o /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Refresh digest pins
+        if: steps.secrets.outputs.present == 'true'
+        run: hack/update_digests.sh
+
+      - name: Open pin-bump PR
+        if: steps.secrets.outputs.present == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: bot/build-busybox
+          base: ${{ github.event.repository.default_branch }}
+          commit-message: "chore: rebuild busybox image and refresh digest pins"
+          title: "chore: rebuild busybox image and refresh digest pins"
+          body: |
+            Rebuilt `quay.io/ocsci/rdr-ocs-workload` from
+            `rdr/container_image/busybox/Dockerfile`, pushed `:latest`, and
+            re-resolved the digest pins with `hack/update_digests.sh`.
+
+            Merging this PR adopts the new build into the workloads (the digest
+            pin, not `:latest`, is what deploys). Review the digest diff first.
+
+            🤖 Generated with [Claude Code](https://claude.com/claude-code)
+          labels: |
+            automated
+            image-build
+          delete-branch: true

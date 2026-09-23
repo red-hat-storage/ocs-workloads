@@ -7,4 +7,4 @@ spec:
   source:
     registry:
       # Image customized for ramen testing.
-      url: "docker://quay.io/ocsci/cirros-dd:0.6.3"
+      url: "docker://quay.io/ocsci/cirros-dd@sha256:90af9a70201a1c45ebb2c0ae92afbf0ec05b8b940f99afb163e8cc8cdbb057ee"

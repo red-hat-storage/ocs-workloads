@@ -33,3 +33,7 @@ patches:
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app5
+images:
+- name: quay.io/ocsci/busybox
+  newTag: latest
+  digest: sha256:c5a7abc1b2c627fca7b5ca3f9f5cbb4f048350e5c08dae2795031550cbf22a0f
