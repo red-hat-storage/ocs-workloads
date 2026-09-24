@@ -1,25 +1,25 @@
 resources:
-- busybox-dc-1.yaml
-- busybox-pvc-1.yaml
-- busybox-dc-2.yaml
-- busybox-pvc-2.yaml
-- busybox-dc-3.yaml
-- busybox-pvc-3.yaml
-- busybox-dc-4.yaml
-- busybox-pvc-4.yaml
-- busybox-dc-5.yaml
-- busybox-pvc-5.yaml
-- busybox-dc-6.yaml
-- busybox-pvc-6.yaml
-- busybox-dc-7.yaml
-- busybox-pvc-7.yaml
-- busybox-dc-8.yaml
-- busybox-pvc-8.yaml
-- busybox-dc-9.yaml
-- busybox-pvc-9.yaml
-- busybox-dc-10.yaml
-- busybox-pvc-10.yaml
+  - busybox-dc-1.yaml
+  - busybox-pvc-1.yaml
+  - busybox-dc-2.yaml
+  - busybox-pvc-2.yaml
+  - busybox-dc-3.yaml
+  - busybox-pvc-3.yaml
+  - busybox-dc-4.yaml
+  - busybox-pvc-4.yaml
+  - busybox-dc-5.yaml
+  - busybox-pvc-5.yaml
+  - busybox-dc-6.yaml
+  - busybox-pvc-6.yaml
+  - busybox-dc-7.yaml
+  - busybox-pvc-7.yaml
+  - busybox-dc-8.yaml
+  - busybox-pvc-8.yaml
+  - busybox-dc-9.yaml
+  - busybox-pvc-9.yaml
+  - busybox-dc-10.yaml
+  - busybox-pvc-10.yaml
 images:
-- name: quay.io/ocsci/rdr-ocs-workload
-  newTag: latest
-  digest: sha256:14538cba9e2bf3d9aa0a575bc750f5d4647baca6e7bb80541a761ba279dbc6e1
+  - name: quay.io/ocsci/rdr-ocs-workload
+    newTag: latest
+    digest: sha256:1655e9041501955c169d2bd7c6b5c4153b4d47efe70efebf7d1f141efc890714
