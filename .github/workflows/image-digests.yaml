@@ -58,8 +58,6 @@ jobs:
             Each `newTag` was re-resolved to its current manifest-list digest via
             `hack/update_digests.sh`. Review the digest changes before merging —
             merging adopts the newer builds.
-
-            🤖 Generated with [Claude Code](https://claude.com/claude-code)
           labels: |
             automated
             image-digests
