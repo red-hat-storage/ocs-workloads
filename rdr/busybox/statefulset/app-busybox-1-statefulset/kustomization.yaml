@@ -1,0 +1,2 @@
+resources:
+- app-1-statefulset.yaml
