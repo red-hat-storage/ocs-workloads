@@ -86,8 +86,14 @@ RAW_OPTS=()
 
 # Resolve the manifest-list (index) digest for a name:tag reference.
 resolve_digest() {
-    local ref="$1" sum
-    sum=$(skopeo inspect --raw "${RAW_OPTS[@]}" "docker://${ref}" 2>/dev/null | sha256sum | cut -d' ' -f1)
+    local ref="$1" raw sum
+    # Capture the raw manifest first so we can distinguish a real failure
+    # (skopeo error / empty output) from a valid response. Hashing straight from
+    # a failed pipe would yield sha256("") = e3b0c442..., a bogus but non-empty
+    # "digest" that must never be written as a pin.
+    raw=$(skopeo inspect --raw "${RAW_OPTS[@]}" "docker://${ref}" 2>/dev/null) || return 1
+    [[ -z "$raw" ]] && return 1
+    sum=$(printf '%s' "$raw" | sha256sum | cut -d' ' -f1)
     [[ -n "$sum" ]] && echo "sha256:${sum}"
 }
 
