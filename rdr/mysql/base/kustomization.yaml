@@ -6,4 +6,13 @@ resources:
 - io_writer_mysql.yaml
 - mysql_secret.yaml
 - mysql_configmap.yaml
-  
+images:
+- name: quay.io/ocsci/mysql
+  newTag: latest
+  digest: sha256:cdf3b62d78d1bbb1d2bd6716895a84014e00716177cbb7e90f6c6a37a21dc796
+- name: quay.io/ocsci/mysql_data_write
+  newTag: latest
+  digest: sha256:9faec986e0caf4372e9fa4e612781a090603c4fbfb3f8c0a3c1e8aae835747e2
+- name: quay.io/ocsci/busybox
+  newTag: latest
+  digest: sha256:c5a7abc1b2c627fca7b5ca3f9f5cbb4f048350e5c08dae2795031550cbf22a0f

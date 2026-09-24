@@ -80,18 +80,41 @@ Examples:
 
 This is enforced by the `tag_images.sh` script.
 
+## Digest Pinning (source of truth)
+
+Workload images are **pinned by immutable digest**, not by the moving `:latest` tag.
+Each kustomization that owns resources carries an `images:` transformer block, e.g.:
+
+```yaml
+images:
+- name: quay.io/ocsci/rdr-ocs-workload
+  newTag: latest                 # tag the digest was resolved from (metadata)
+  digest: sha256:14538cba…        # what the node actually pulls (immutable)
+```
+
+At render time kustomize rewrites every matching `image:` to `name:latest@sha256:…`.
+The manifests may still say `:latest`, but the digest is what deploys. VM containerDisk
+images are pinned the same way in their `url:` field: `docker://quay.io/ocsci/cirros-dd@sha256:…`.
+
+**Why:** failover/relocate must run the exact same build on both clusters; `:latest`
+can drift between them and produce false integrity results. Digests also work with
+disconnected `ImageDigestMirrorSet` mirrors.
+
 ## Automatic Image Detection
 
 The `tag_images.sh` and `verify_images.sh` scripts **automatically detect** all container images in the `rdr/` directory. You don't need to manually update the scripts when adding new images!
 
 **How it works:**
-1. Scripts scan all YAML files in `rdr/` directory
-2. Detect two types of images:
-   - Container images: `image: quay.io/...:latest`
-   - VM images (containerDisk): `url: docker://quay.io/...:version` (any version)
-3. Extract unique image names with their current tags
-4. Exclude external images (e.g., `quay.io/prometheus/*`)
-5. Tag from current version to release version (e.g., `:0.6.3` → `:release-4.17`)
+1. Scripts read the pinned digests from every kustomize `images:` block (via `yq`)
+   and from digest-pinned VM `url:` fields — this is the source of truth.
+2. Exclude external images (e.g., `quay.io/prometheus/*`).
+3. `tag_images.sh` copies each `name@sha256:<digest>` to `name:release-X`
+   (`skopeo copy --all`, preserving multi-arch), so the release tag is guaranteed
+   to match exactly the digest master tested — even if `:latest` has since moved.
+4. `verify_images.sh` confirms `name:release-X` exists **and** that its manifest-list
+   digest equals the pinned digest.
+
+**Requirement:** `yq` (mikefarah v4) must be installed, in addition to `skopeo`.
 
 **Detected Image Types:**
 - ✅ Standard container images (Deployments, Pods)
@@ -320,6 +343,13 @@ Follow these steps in order:
 - **External Images**: The `quay.io/prometheus/busybox:latest` image is external and doesn't need to be tagged
 - **Verification**: Always verify images exist in Quay before updating YAML files
 - **Consistency**: Use the exact same release tag for all images and the git branch
+- **Digests are the source of truth**: `tag_images.sh` copies from the pinned
+  `@sha256:` digest (not `:latest`). The manual `:latest`-based CLI examples below are
+  fallbacks; prefer the automated script so `:release-X` matches the tested digest.
+- **Digests are never hand-edited**: pins are updated by automation (`hack/update_digests.sh`
+  / the nightly digest workflow), and CI fails if pins are stale or inconsistent.
+- **`create_rdr_release.sh`** flips `newTag: latest` → `newTag: release-X` in the
+  `images:` blocks (keeping the digest), and leaves digest-pinned VM `url:` fields untouched.
 
 ---
 

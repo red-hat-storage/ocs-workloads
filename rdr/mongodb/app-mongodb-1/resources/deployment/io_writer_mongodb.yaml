@@ -22,7 +22,7 @@ spec:
       - name: mongodb
         image: quay.io/ocsci/mongodb_data_write:latest
         command: ['/usr/local/bin/python3', '/script/db.py']
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
          - name: MONGO_DB_HOST
            value: mongodb

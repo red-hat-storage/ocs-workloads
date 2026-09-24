@@ -23,7 +23,7 @@ spec:
       - name: mysql
         image: quay.io/ocsci/mysql_data_write:latest
         command: ['/usr/bin/python3', '/script/db.py']
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
          - name: MYSQL_DB_HOST
            value: mysql

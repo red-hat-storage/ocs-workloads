@@ -6,4 +6,13 @@ resources:
 - mongodb-service.yaml
 commonLabels:
   app-name: app-mongodb-cephfs-1
-  
+images:
+- name: quay.io/ocsci/mongodb_rdr
+  newTag: latest
+  digest: sha256:1ff65169cc24bbf2966a8b451cc15fd32104cba1e4e57ade389216c47da7c77e
+- name: quay.io/ocsci/mongodb_data_write
+  newTag: latest
+  digest: sha256:d730d3b1bb229ac72f435f8850d4f1ae51cda21ea94be85e5b2b7c7224f01f5d
+- name: quay.io/ocsci/busybox
+  newTag: latest
+  digest: sha256:c5a7abc1b2c627fca7b5ca3f9f5cbb4f048350e5c08dae2795031550cbf22a0f

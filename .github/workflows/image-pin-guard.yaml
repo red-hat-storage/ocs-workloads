@@ -1,0 +1,36 @@
+name: "Image Pin Guard"
+
+# Fails a PR if any rdr/ workload would deploy an un-pinned image, or if an
+# image name is pinned to conflicting digests. Runs offline: it renders every
+# kustomize root and inspects the resulting image: fields. The registry
+# existence check is best-effort and self-skips when the registry is unreachable.
+
+on:
+  pull_request:
+    paths:
+      - "rdr/**"
+      - "hack/verify_pins.sh"
+      - ".github/workflows/image-pin-guard.yaml"
+
+jobs:
+  verify-pins:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install kustomize and yq
+        run: |
+          set -euo pipefail
+          # yq (mikefarah v4)
+          sudo curl -fsSL -o /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          # kustomize
+          curl -fsSL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/kustomize
+          yq --version
+          kustomize version
+
+      - name: Verify image pins
+        run: hack/verify_pins.sh

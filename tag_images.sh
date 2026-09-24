@@ -52,20 +52,22 @@ EXAMPLES:
     $0 -t release-4.17 -d
 
 DESCRIPTION:
-    This script automatically detects and tags all container images found in the
-    rdr/ directory. It handles both:
-      - Container images with :latest tag
-      - VM containerDisk images with any version tag (e.g., :0.6.3)
+    This script tags all container images used by the rdr/ workloads for a
+    release. Images are sourced by their PINNED DIGEST (the immutable source of
+    truth), not the moving :latest tag, so :release-X always matches exactly what
+    master tested. It detects:
+      - Container images from kustomize 'images:' blocks (name + digest)
+      - VM containerDisk images from 'url: docker://' fields (digest-pinned)
 
     The script preserves multi-architecture manifests using:
       - skopeo: Uses --all flag to explicitly copy all architectures
       - docker/podman: Preserves multi-arch by default
 
     Auto-detected images (example):
-      - quay.io/ocsci/rdr-ocs-workload:latest → :release-4.17
-      - quay.io/ocsci/filebrowser:latest → :release-4.17
-      - quay.io/ocsci/cirros-dd:0.6.3 → :release-4.17 (VM image)
-      - quay.io/ocsci/mongodb_rdr:latest → :release-4.17
+      - quay.io/ocsci/rdr-ocs-workload@sha256:... → :release-4.17
+      - quay.io/ocsci/filebrowser@sha256:...      → :release-4.17
+      - quay.io/ocsci/cirros-dd@sha256:...         → :release-4.17 (VM image)
+      - quay.io/ocsci/mongodb_rdr@sha256:...       → :release-4.17
       - And more...
 
 NOTES:
@@ -204,54 +206,63 @@ print_info "Scanning rdr/ directory for container images..."
 
 # Use parallel arrays for bash 3.x compatibility
 declare -a image_names
-declare -a image_current_tags
+declare -a image_source_refs   # immutable source ref per image: "@sha256:..." (or ":tag" fallback)
 
 # Temporary file to collect all images with their current tags
 temp_file=$(mktemp)
 trap 'rm -f "$temp_file"' EXIT
 
-# Pattern 1: Extract images with :latest tag (container images + kustomize patches)
-{
-    grep -rh "image:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null
-    grep -rh "value:.*:latest" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null
-} | \
-    sed -E 's/.*(image|value):[[:space:]]*//g' | \
-    sed 's/[[:space:]]*#.*//g' | \
-    sed "s/'//g" | \
-    sed 's/"//g' | \
+# Pattern 1: pinned images from kustomize images: blocks (name + digest).
+# The digest is the source of truth — copy THAT to :release-X, not the moving :latest tag.
+find rdr -name kustomization.yaml -print0 2>/dev/null | while IFS= read -r -d '' kfile; do
+    yq eval '.images[]? | .name + "|@" + .digest' "$kfile" 2>/dev/null
+done | \
     grep -v "^$" | \
     grep -v "quay.io/prometheus" | \
     sort -u | \
-while IFS= read -r line; do
-    if [[ -n "$line" ]]; then
-        image=$(echo "$line" | sed 's/:latest$//')
-        echo "${image}|latest" >> "$temp_file"
+while IFS='|' read -r image srcref; do
+    if [[ -n "$image" ]] && ! grep -q "^${image}|" "$temp_file" 2>/dev/null; then
+        echo "${image}|${srcref}" >> "$temp_file"
     fi
 done
 
-# Pattern 2: Extract VM images with any tag (containerDisk images)
+# Pattern 2: VM containerDisk images (url: docker://) — now digest-pinned too.
 grep -rh "url:.*docker://" rdr/ --include="*.yaml" --include="*.yml" 2>/dev/null | \
     sort -u | \
 while IFS= read -r line; do
     if [[ -n "$line" ]]; then
-        # Extract full image with tag: quay.io/ocsci/cirros-dd:0.6.3
+        # Strip to the bare ref: quay.io/ocsci/cirros-dd@sha256:... or name:tag
         full_image=$(echo "$line" | sed 's/.*docker:\/\///g' | sed 's/[[:space:]]*#.*//g' | sed "s/'//g" | sed 's/"//g')
-        # Extract image without tag: quay.io/ocsci/cirros-dd
-        image=$(echo "$full_image" | sed 's/:[^:]*$//')
-        # Extract current tag: 0.6.3
-        current_tag=$(echo "$full_image" | sed 's/.*://')
+        case "$full_image" in
+            *@sha256:*)
+                image="${full_image%@*}"
+                srcref="@${full_image#*@}"
+                ;;
+            *)
+                image="${full_image%:*}"
+                srcref=":${full_image##*:}"
+                ;;
+        esac
 
         # Check if image already exists in temp file
         if ! grep -q "^${image}|" "$temp_file" 2>/dev/null; then
-            echo "${image}|${current_tag}" >> "$temp_file"
+            echo "${image}|${srcref}" >> "$temp_file"
         fi
     fi
 done
 
+# Guard: fail if one image name is pinned to different digests anywhere in rdr/
+dupes=$(cut -d'|' -f1 "$temp_file" | sort | uniq -d)
+if [[ -n "$dupes" ]]; then
+    print_error "Same image name pinned to different sources across rdr/:"
+    echo "$dupes"
+    exit 1
+fi
+
 # Read unique images into parallel arrays (avoid subshell by using process substitution correctly)
-while IFS='|' read -r img_name img_tag; do
+while IFS='|' read -r img_name img_src; do
     image_names+=("$img_name")
-    image_current_tags+=("$img_tag")
+    image_source_refs+=("$img_src")
 done < <(sort -u "$temp_file" 2>/dev/null)
 
 total_images=${#image_names[@]}
@@ -271,7 +282,7 @@ echo ""
 # Show the images that will be tagged
 print_info "Images to be tagged:"
 for ((i=0; i<${#image_names[@]}; i++)); do
-    echo "  - ${image_names[$i]}:${image_current_tags[$i]} → ${image_names[$i]}:${RELEASE_TAG}"
+    echo "  - ${image_names[$i]}${image_source_refs[$i]} → ${image_names[$i]}:${RELEASE_TAG}"
 done
 echo ""
 
@@ -289,14 +300,14 @@ declare -a not_tagged_report
 
 for ((i=0; i<${#image_names[@]}; i++)); do
     image="${image_names[$i]}"
-    current_tag="${image_current_tags[$i]}"
+    src_ref="${image_source_refs[$i]}"
     print_info "Processing: $image"
 
     if [[ "$DRY_RUN" == "true" ]]; then
-        echo "  Would tag: ${image}:${current_tag} → ${image}:${RELEASE_TAG}"
+        echo "  Would tag: ${image}${src_ref} → ${image}:${RELEASE_TAG}"
         echo "  Would push: ${image}:${RELEASE_TAG}"
         success_count=$((success_count + 1))
-        tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|DRY-RUN")
+        tagged_report+=("${image}${src_ref}|${image}:${RELEASE_TAG}|DRY-RUN")
     else
         case "$METHOD" in
             skopeo)
@@ -313,33 +324,33 @@ for ((i=0; i<${#image_names[@]}; i++)); do
                 fi
 
                 if skopeo copy $skopeo_opts \
-                    docker://${image}:${current_tag} \
+                    docker://${image}${src_ref} \
                     docker://${image}:${RELEASE_TAG} 2>&1; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"
                     success_count=$((success_count + 1))
-                    tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|TAGGED")
+                    tagged_report+=("${image}${src_ref}|${image}:${RELEASE_TAG}|TAGGED")
                 else
                     print_error "Failed to tag: ${image}"
                     failed_images+=("$image")
                     failed_count=$((failed_count + 1))
-                    not_tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|FAILED")
+                    not_tagged_report+=("${image}${src_ref}|${image}:${RELEASE_TAG}|FAILED")
                 fi
                 ;;
             docker|podman)
                 # Pull, tag, and push
                 # Note: docker/podman preserve multi-arch manifests by default when pulling
                 # The manifest list is maintained across tag and push operations
-                if ${METHOD} pull ${image}:${current_tag} && \
-                   ${METHOD} tag ${image}:${current_tag} ${image}:${RELEASE_TAG} && \
+                if ${METHOD} pull ${image}${src_ref} && \
+                   ${METHOD} tag ${image}${src_ref} ${image}:${RELEASE_TAG} && \
                    ${METHOD} push ${image}:${RELEASE_TAG}; then
                     print_success "Tagged and pushed: ${image}:${RELEASE_TAG}"
                     success_count=$((success_count + 1))
-                    tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|TAGGED")
+                    tagged_report+=("${image}${src_ref}|${image}:${RELEASE_TAG}|TAGGED")
                 else
                     print_error "Failed to tag: ${image}"
                     failed_images+=("$image")
                     failed_count=$((failed_count + 1))
-                    not_tagged_report+=("${image}:${current_tag}|${image}:${RELEASE_TAG}|FAILED")
+                    not_tagged_report+=("${image}${src_ref}|${image}:${RELEASE_TAG}|FAILED")
                 fi
                 ;;
         esac

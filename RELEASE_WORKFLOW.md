@@ -32,32 +32,36 @@ This document provides a quick reference for creating RDR releases.
 
 ## What Gets Updated
 
-### Container Images (Auto-Detected)
+### Container Images (Auto-Detected, digest-pinned)
 
-The scripts **automatically detect** all images in the `rdr/` directory with any tag:
+Images are pinned by digest in kustomize `images:` blocks (and digest-pinned VM `url:`
+fields). The scripts read those digests (via `yq`) and tag **from the digest**, so
+`:release-4.17` always matches the exact build master tested — not a moving `:latest`.
 
 Currently detected (example):
-- `quay.io/ocsci/rdr-ocs-workload:latest` → `:release-4.17`
-- `quay.io/ocsci/filebrowser:latest` → `:release-4.17`
-- `quay.io/ocsci/cirros-dd:0.6.3` → `:release-4.17` (VM image)
-- `quay.io/ocsci/mongodb_rdr:latest` → `:release-4.17`
-- `quay.io/ocsci/mongodb_data_write:latest` → `:release-4.17`
-- `quay.io/ocsci/mysql:latest` → `:release-4.17`
-- `quay.io/ocsci/mysql_data_write:latest` → `:release-4.17`
-- `quay.io/ocsci/filebrowser_data_write:latest` → `:release-4.17`
+- `quay.io/ocsci/rdr-ocs-workload@sha256:…` → `:release-4.17`
+- `quay.io/ocsci/filebrowser@sha256:…` → `:release-4.17`
+- `quay.io/ocsci/cirros-dd@sha256:…` → `:release-4.17` (VM image)
+- `quay.io/ocsci/mongodb_rdr@sha256:…` → `:release-4.17`
+- `quay.io/ocsci/mongodb_data_write@sha256:…` → `:release-4.17`
+- `quay.io/ocsci/mysql@sha256:…` → `:release-4.17`
+- `quay.io/ocsci/mysql_data_write@sha256:…` → `:release-4.17`
+- `quay.io/ocsci/filebrowser_data_write@sha256:…` → `:release-4.17`
 
 **Note:**
-- New images added to the `rdr/` directory are automatically detected - no script updates needed!
-- Multi-arch images are fully preserved (all architectures maintained)
-- Works with any image tag (`:latest`, `:0.6.3`, etc.)
-- External images like `quay.io/prometheus/*` are automatically excluded from tagging
+- New images added via an `images:` block are automatically detected - no script updates needed!
+- Multi-arch images are fully preserved (`skopeo copy --all`).
+- `verify_images.sh` also checks that `:release-4.17` resolves to the pinned digest.
+- External images like `quay.io/prometheus/*` are automatically excluded from tagging.
+- Requires `yq` (mikefarah v4) in addition to `skopeo`.
 
 ### YAML Files (~70 files in rdr/ folder)
-1. **Container image tags**: `:latest` → `:release-4.17`
-2. **VM containerDisk images**: Any version → `:release-4.17`
-3. **ApplicationSet targetRevision**: `master` → `release-4.17`
-4. **Subscription git-branch**: `master` → `release-4.17`
-5. **GitHub raw URLs**: `/master/` → `/release-4.17/`
+1. **Container image tags**: `:latest` → `:release-4.17` (cosmetic — the pinned digest still wins at render)
+2. **Kustomize `images:` metadata**: `newTag: latest` → `newTag: release-4.17` (digest unchanged)
+3. **VM containerDisk images**: digest-pinned `url:` fields are left unchanged (digest is immutable)
+4. **ApplicationSet targetRevision**: `master` → `release-4.17`
+5. **Subscription git-branch**: `master` → `release-4.17`
+6. **GitHub raw URLs**: `/master/` → `/release-4.17/`
 
 ## Common Commands
 

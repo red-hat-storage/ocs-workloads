@@ -18,7 +18,7 @@ spec:
       containers:
       - name: fb-client
         image: quay.io/ocsci/filebrowser_data_write:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
         - name: CONFIG_PATH
           value: "/config"

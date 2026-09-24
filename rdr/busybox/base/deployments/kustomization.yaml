@@ -19,3 +19,7 @@ resources:
 - busybox-pvc-9.yaml
 - busybox-dc-10.yaml
 - busybox-pvc-10.yaml
+images:
+- name: quay.io/ocsci/rdr-ocs-workload
+  newTag: latest
+  digest: sha256:14538cba9e2bf3d9aa0a575bc750f5d4647baca6e7bb80541a761ba279dbc6e1

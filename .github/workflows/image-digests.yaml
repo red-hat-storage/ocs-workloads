@@ -1,0 +1,66 @@
+name: "Refresh Image Digests"
+
+# Refresh the pinned image digests in rdr/ kustomization images: blocks on the
+# DEFAULT branch only (master/main). Re-resolves each `newTag: latest` to its
+# current manifest-list digest and, if anything changed, opens a review PR.
+#
+# Branch model:
+#   - master/main: pins roll forward to the newest builds via this workflow.
+#   - release-* branches: FROZEN. This workflow refuses to run on them — the job
+#     is guarded to the default branch, so even a manual dispatch on a release
+#     branch is skipped. A release keeps deploying the exact digest it was cut
+#     with. To change a release pin, edit it in a normal PR to that branch.
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # 03:00 UTC daily (schedule only fires on default branch)
+  workflow_dispatch: {}   # manual runs on non-default branches are skipped (see job if:)
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh-digests:
+    runs-on: ubuntu-latest
+    # Hard guard: only ever run on the default branch (master/main). A manual
+    # dispatch on a release-* branch is skipped, keeping release pins frozen.
+    if: github.ref_name == github.event.repository.default_branch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install skopeo and yq
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+          sudo curl -fsSL -o /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          skopeo --version
+          yq --version
+
+      - name: Refresh digests
+        run: hack/update_digests.sh
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: bot/image-digests
+          base: ${{ github.event.repository.default_branch }}
+          commit-message: "chore: refresh pinned image digests"
+          title: "chore: refresh pinned image digests"
+          body: |
+            Automated refresh of pinned container image digests in `rdr/`
+            kustomization `images:` blocks on the default branch.
+
+            Each `newTag` was re-resolved to its current manifest-list digest via
+            `hack/update_digests.sh`. Review the digest changes before merging —
+            merging adopts the newer builds.
+
+            🤖 Generated with [Claude Code](https://claude.com/claude-code)
+          labels: |
+            automated
+            image-digests
+          delete-branch: true

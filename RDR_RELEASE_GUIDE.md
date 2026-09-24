@@ -80,7 +80,9 @@ Deploy workloads from the release branch and verify everything works correctly.
 
 ### Container Image Tagging (`tag_images.sh`)
 
-This script **automatically detects and tags** all container images with `:latest` tag found in the `rdr/` directory. No manual updates needed when adding new images!
+This script **automatically detects and tags** all container images found in the `rdr/` directory. It reads the **pinned `@sha256:` digests** (the source of truth) from kustomize `images:` blocks and digest-pinned VM `url:` fields, and copies each digest to `:RELEASE_TAG`, so the release tag always matches exactly the build master tested. No manual updates needed when adding new images!
+
+> **Requires `yq`** (mikefarah v4) in addition to your tagging tool (skopeo/docker/podman).
 
 **Usage:**
 ```bash
@@ -123,10 +125,10 @@ skopeo login quay.io
 ```
 
 **How Auto-Detection Works:**
-- Scans all YAML files in `rdr/` directory
-- Extracts container images with `:latest` tag
-- Extracts VM containerDisk images with any version tag
-- Detects current tag for each image (latest, 0.6.3, etc.)
+- Reads pinned digests from every kustomize `images:` block (via `yq`) — the source of truth
+- Reads digest-pinned VM containerDisk images from `url: docker://…@sha256:…` fields
+- Copies each `name@sha256:<digest>` to `name:RELEASE_TAG` (never from the moving `:latest`)
+- Fails fast if one image name is pinned to conflicting digests across `rdr/`
 - Excludes external images (e.g., `quay.io/prometheus/*`)
 - Shows you the complete list before tagging
 
@@ -136,10 +138,10 @@ skopeo login quay.io
 [SUCCESS] Found 8 unique image(s) to tag
 
 [INFO] Images to be tagged:
-  - quay.io/ocsci/cirros-dd:0.6.3 → quay.io/ocsci/cirros-dd:release-4.17
-  - quay.io/ocsci/filebrowser:latest → quay.io/ocsci/filebrowser:release-4.17
-  - quay.io/ocsci/rdr-ocs-workload:latest → quay.io/ocsci/rdr-ocs-workload:release-4.17
-  - quay.io/ocsci/filebrowser_data_write:latest → ...
+  - quay.io/ocsci/cirros-dd@sha256:90af9a70… → quay.io/ocsci/cirros-dd:release-4.17
+  - quay.io/ocsci/filebrowser@sha256:… → quay.io/ocsci/filebrowser:release-4.17
+  - quay.io/ocsci/rdr-ocs-workload@sha256:14538cba… → quay.io/ocsci/rdr-ocs-workload:release-4.17
+  - quay.io/ocsci/filebrowser_data_write@sha256:… → ...
   [and more...]
 ```
 
@@ -241,28 +243,45 @@ Create the release branch and immediately push to remote:
 
 The script updates **five types of references** in all YAML files within the `rdr/` directory:
 
-### 1. Container Image Tags
+### 1. Container Image Tags & Digest Pins
+
+Workload images are **pinned by digest** in kustomize `images:` blocks. The digest is
+the immutable source of truth (what actually gets pulled); the tag is cosmetic metadata.
+The script flips the `newTag` and the visible `image:` tag, but **leaves the digest
+unchanged**:
 
 **Before:**
 ```yaml
+# deployment
 image: quay.io/ocsci/rdr-ocs-workload:latest
+# kustomization.yaml
+images:
+- name: quay.io/ocsci/rdr-ocs-workload
+  newTag: latest
+  digest: sha256:14538cba…
 ```
 
 **After (for branch `release-4.17`):**
 ```yaml
+# deployment
 image: quay.io/ocsci/rdr-ocs-workload:release-4.17
+# kustomization.yaml
+images:
+- name: quay.io/ocsci/rdr-ocs-workload
+  newTag: release-4.17
+  digest: sha256:14538cba…      # unchanged — still deploys the exact tested build
 ```
+
+At render time kustomize produces `…:release-4.17@sha256:14538cba…`, so the release
+branch pulls the same digest master tested, just under a stable release tag.
 
 ### 1b. VM ContainerDisk Images
 
-**Before:**
-```yaml
-url: docker://quay.io/ocsci/cirros-dd:0.6.3
-```
+VM `url:` fields are **digest-pinned** and are **left unchanged** by the script — a
+digest is already immutable, so there is nothing to flip:
 
-**After (for branch `release-4.17`):**
 ```yaml
-url: docker://quay.io/ocsci/cirros-dd:release-4.17
+url: docker://quay.io/ocsci/cirros-dd@sha256:90af9a70…   # unchanged across releases
 ```
 
 ### 2. ApplicationSet Target Revision
@@ -319,16 +338,19 @@ value: ["wget https://raw.githubusercontent.com/red-hat-storage/ocs-workloads/re
 
 ### Images Affected
 
-The script updates tags for all images found in `rdr/` folder, including:
-- `quay.io/ocsci/rdr-ocs-workload:latest`
-- `quay.io/ocsci/mongodb_rdr:latest`
-- `quay.io/ocsci/mysql:latest`
-- `quay.io/ocsci/filebrowser_data_write:latest`
-- `quay.io/ocsci/filebrowser:latest`
-- `quay.io/ocsci/mongodb_data_write:latest`
-- `quay.io/ocsci/mysql_data_write:latest`
-- `quay.io/prometheus/busybox:latest`
-- And any other images with `:latest` tag
+The script flips the visible tag and `newTag` (digests stay pinned) for all images
+found in `rdr/`, including:
+- `quay.io/ocsci/rdr-ocs-workload`
+- `quay.io/ocsci/mongodb_rdr`
+- `quay.io/ocsci/mysql`
+- `quay.io/ocsci/filebrowser_data_write`
+- `quay.io/ocsci/filebrowser`
+- `quay.io/ocsci/mongodb_data_write`
+- `quay.io/ocsci/mysql_data_write`
+- And any other image with an `images:` block (digest preserved)
+
+Digest-pinned VM `url:` images (e.g. `quay.io/ocsci/cirros-dd@sha256:…`) are left
+unchanged, and external images (e.g. `quay.io/prometheus/busybox`) are never retagged.
 
 ## Workflow Examples
 
@@ -390,7 +412,7 @@ The script provides colored output:
 
 ### "No files were updated"
 - All images may already be using the specified tag
-- Verify that YAML files in `rdr/` contain `image:` fields with `:latest` tag
+- Verify that kustomization files in `rdr/` contain `images:` blocks with `newTag: latest`
 
 ### Branch Already Exists Remotely
 - If you need to recreate the branch:
@@ -478,8 +500,8 @@ $ ./create_rdr_release.sh -b release-4.17
 
 When you run the script with branch `release-4.17`, it will:
 
-1. ✅ Update all container image tags from `:latest` → `:release-4.17`
-2. ✅ Update all VM containerDisk image tags (any version) → `:release-4.17`
+1. ✅ Update container image tags `:latest` → `:release-4.17` and `newTag: latest` → `newTag: release-4.17` (digests preserved)
+2. ✅ Leave digest-pinned VM containerDisk `url:` images unchanged (already immutable)
 3. ✅ Update all ApplicationSet `targetRevision: master` → `targetRevision: release-4.17`
 4. ✅ Update all Subscription git branch annotations from `master` → `release-4.17`
 5. ✅ Update all GitHub raw URLs from `/master/` → `/release-4.17/`

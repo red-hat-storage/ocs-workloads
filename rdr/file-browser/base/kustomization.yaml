@@ -7,3 +7,10 @@ resources:
 - fb-route.yaml
 - fb-service.yaml
 - filebrowser-pvc.yaml
+images:
+- name: quay.io/ocsci/filebrowser
+  newTag: latest
+  digest: sha256:c3aa47b2b2cc5f62889fdf65ebae0171501a6cb48405adf84f0e2eeeff88d27e
+- name: quay.io/ocsci/filebrowser_data_write
+  newTag: latest
+  digest: sha256:ff20f318833dce5d1c7ecdeb87850ee86fe412d306a30c7030514423019ba3c8

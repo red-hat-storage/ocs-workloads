@@ -400,6 +400,13 @@ update_file() {
         has_kustomize_images=1
     fi
 
+    # Check for kustomize images: transformer metadata (newTag: latest).
+    # The digest still wins at render time; this just keeps the tag metadata truthful.
+    local has_newtag=0
+    if grep -q "newTag: latest" "$file" 2>/dev/null; then
+        has_newtag=1
+    fi
+
     # Check for targetRevision: master
     local has_target_revision=0
     if grep -q "targetRevision: master" "$file" 2>/dev/null; then
@@ -437,7 +444,7 @@ update_file() {
     fi
 
     # Skip if no changes needed
-    if [[ "$has_image_tags" -eq 0 && "$has_kustomize_images" -eq 0 && "$has_target_revision" -eq 0 && "$has_git_branch" -eq 0 && "$has_github_url" -eq 0 && "$has_vm_images" -eq 0 ]]; then
+    if [[ "$has_image_tags" -eq 0 && "$has_kustomize_images" -eq 0 && "$has_newtag" -eq 0 && "$has_target_revision" -eq 0 && "$has_git_branch" -eq 0 && "$has_github_url" -eq 0 && "$has_vm_images" -eq 0 ]]; then
         return 1
     fi
 
@@ -491,6 +498,15 @@ update_file() {
             done
         fi
 
+        # Show kustomize images: newTag metadata changes
+        if [[ "$has_newtag" -eq 1 ]]; then
+            echo "  Kustomize images: newTag (digest unchanged):"
+            grep "newTag: latest" "$file" | while read -r line; do
+                echo "    OLD: $line"
+                echo "    NEW: ${line/newTag: latest/newTag: ${branch}}"
+            done
+        fi
+
         # Show VM containerDisk image changes (excluding prometheus)
         if [[ "$has_vm_images" -eq 1 ]]; then
             echo "  VM Images (containerDisk):"
@@ -507,18 +523,22 @@ update_file() {
             # macOS sed requires '' after -i
             [[ "$has_image_tags" -eq 1 ]] && sed -i '' "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
             [[ "$has_kustomize_images" -eq 1 ]] && sed -i '' "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
+            [[ "$has_newtag" -eq 1 ]] && sed -i '' "s/newTag: latest/newTag: ${branch}/g" "$file"
             [[ "$has_target_revision" -eq 1 ]] && sed -i '' "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
             [[ "$has_git_branch" -eq 1 ]] && sed -i '' "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
             [[ "$has_github_url" -eq 1 ]] && sed -i '' "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
-            [[ "$has_vm_images" -eq 1 ]] && sed -i '' "s|\(url:.*docker://[^:]*\):[^'\"[:space:]]*|\1:${branch}|g" "$file"
+            # Do NOT rewrite digest-pinned VM URLs (@sha256:...) — the digest is immutable.
+            [[ "$has_vm_images" -eq 1 ]] && sed -i '' "/@sha256:/!s|\(url:.*docker://[^:]*\):[^'\"[:space:]]*|\1:${branch}|g" "$file"
         else
             # Linux sed doesn't need '' after -i
             [[ "$has_image_tags" -eq 1 ]] && sed -i "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
             [[ "$has_kustomize_images" -eq 1 ]] && sed -i "/quay.io\/prometheus/!s/:latest/:${branch}/g" "$file"
+            [[ "$has_newtag" -eq 1 ]] && sed -i "s/newTag: latest/newTag: ${branch}/g" "$file"
             [[ "$has_target_revision" -eq 1 ]] && sed -i "s/targetRevision: master/targetRevision: ${branch}/g" "$file"
             [[ "$has_git_branch" -eq 1 ]] && sed -i "s/\(git-branch: \)master/\1${branch}/g; s/\(github-branch: \)master/\1${branch}/g" "$file"
             [[ "$has_github_url" -eq 1 ]] && sed -i "s|raw.githubusercontent.com/red-hat-storage/ocs-workloads/master|raw.githubusercontent.com/red-hat-storage/ocs-workloads/${branch}|g" "$file"
-            [[ "$has_vm_images" -eq 1 ]] && sed -i "s|\(url:.*docker://[^:]*\):[^'\"[:space:]]*|\1:${branch}|g" "$file"
+            # Do NOT rewrite digest-pinned VM URLs (@sha256:...) — the digest is immutable.
+            [[ "$has_vm_images" -eq 1 ]] && sed -i "/@sha256:/!s|\(url:.*docker://[^:]*\):[^'\"[:space:]]*|\1:${branch}|g" "$file"
         fi
         print_success "Updated: $file"
     fi
@@ -570,8 +590,16 @@ if [[ "$DRY_RUN" == "true" ]]; then
     fi
     if [[ -n "$vm_images" ]]; then
         echo "$vm_images" | while read -r img; do
-            new_img=$(echo "$img" | sed "s/\(.*\):[^:]*$/\1:${BRANCH_NAME}/")
-            echo "    ${img} → ${new_img}"
+            case "$img" in
+                *@sha256:*)
+                    # Digest-pinned VM image: immutable, not retagged on the branch
+                    echo "    ${img} (digest-pinned, unchanged)"
+                    ;;
+                *)
+                    new_img=$(echo "$img" | sed "s/\(.*\):[^:]*$/\1:${BRANCH_NAME}/")
+                    echo "    ${img} → ${new_img}"
+                    ;;
+            esac
         done
     fi
     if [[ -z "$updated_images" && -z "$vm_images" ]]; then
