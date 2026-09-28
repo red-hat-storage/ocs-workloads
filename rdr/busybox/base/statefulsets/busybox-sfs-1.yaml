@@ -13,6 +13,8 @@ spec:
     matchLabels:
       workload: busybox-sfs-1
   podManagementPolicy: Parallel
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Delete
   template:
     metadata:
       labels:
