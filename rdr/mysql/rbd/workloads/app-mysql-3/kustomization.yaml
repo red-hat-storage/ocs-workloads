@@ -7,3 +7,20 @@ patches:
       - op: replace
         path: /metadata/labels/appname
         value: mysql_app_3
+  - target:
+      kind: Deployment
+      name: mysql
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: mysql-rbd
+      - op: replace
+        path: /spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+        value: mysql-pv-claim-rbd
+  - target:
+      kind: PersistentVolumeClaim
+      name: mysql-pv-claim
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: mysql-pv-claim-rbd
