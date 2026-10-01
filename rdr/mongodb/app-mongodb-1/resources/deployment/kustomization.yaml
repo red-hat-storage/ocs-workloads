@@ -6,6 +6,24 @@ resources:
 - mongodb-service.yaml
 commonLabels:
   app-name: app-mongodb-rbd-1
+patches:
+  - target:
+      kind: Deployment
+      name: mongo
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: mongo-rbd
+      - op: replace
+        path: /spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+        value: mongo-data-rbd
+  - target:
+      kind: PersistentVolumeClaim
+      name: mongo-data
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: mongo-data-rbd
 images:
 - name: quay.io/ocsci/mongodb_rdr
   newTag: latest
