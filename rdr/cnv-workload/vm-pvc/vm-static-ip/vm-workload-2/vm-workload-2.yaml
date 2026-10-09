@@ -4,9 +4,6 @@ kind: VirtualMachine
 metadata:
   name: vm-static-ip-workload-2
   namespace: vm-ip-translation-test
-  labels:
-    appname: vm-cloudinit-static-ip
-    ramendr.openshift.io/k8s-resource-selector: vm-cloudinit-static-ip
 spec:
   running: true
   template:
