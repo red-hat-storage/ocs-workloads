@@ -17,7 +17,6 @@ spec:
         network.kubevirt.io/addresses: '{"vm-network": ["192.168.1.11"]}'
       labels:
         kubevirt.io/size: small
-        appname: kubevirt
     spec:
       domain:
         cpu:
