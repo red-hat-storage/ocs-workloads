@@ -1,0 +1,62 @@
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-static-ip-workload-3
+  namespace: vm-ip-translation-test
+  labels:
+    appname: static-ip-workload
+    ramendr.openshift.io/k8s-resource-selector: static-ip-workload
+spec:
+  runStrategy: Always
+  template:
+    metadata:
+      annotations:
+        network.kubevirt.io/addresses: '{"vm-network":["192.168.1.13"]}'
+      labels:
+        appname: static-ip-workload
+        kubevirt.io/domain: vm-static-ip
+    spec:
+      domain:
+        devices:
+          disks:
+            - name: containerdisk
+              disk: { bus: virtio }
+            - name: cloudinitdisk
+              disk: { bus: virtio }
+          interfaces:
+            - name: vm-network
+              bridge: {}
+        resources:
+          requests:
+            memory: 1024M
+      networks:
+        - name: vm-network
+          pod: {}
+      terminationGracePeriodSeconds: 0
+      volumes:
+        - name: containerdisk
+          persistentVolumeClaim:
+            claimName: vm-static-ip-root-disk
+        - name: cloudinitdisk
+          cloudInitNoCloud:
+            networkDataSecretRef:
+              name: vm-secret-1
+            userData: |-
+              #cloud-config
+              password: fedora
+              chpasswd: { expire: False }
+  dataVolumeTemplates:
+    - metadata:
+        name: vm-static-ip-root-disk-3
+        labels:
+          appname: static-ip-workload
+      spec:
+        storage:
+          accessModes: [ReadWriteOnce]
+          resources:
+            requests:
+              storage: 5Gi
+          storageClassName: ocs-storagecluster-ceph-rbd-virtualization
+        source:
+          registry:
+            url: "docker://quay.io/kubevirt/fedora-with-test-tooling-container-disk:devel"

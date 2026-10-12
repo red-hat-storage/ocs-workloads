@@ -1,0 +1,7 @@
+---
+resources:
+  - vm-workload-3.yaml
+commonLabels:
+  appname: static-ip-workload
+generatorOptions:
+  disableNameSuffixHash: true
