@@ -4,8 +4,7 @@ metadata:
   name: vm-static-ip-workload-3
   namespace: vm-ip-translation-test
   labels:
-    appname: static-ip-workload
-    ramendr.openshift.io/k8s-resource-selector: static-ip-workload
+    appname: kubevirt
 spec:
   runStrategy: Always
   template:
@@ -13,7 +12,7 @@ spec:
       annotations:
         network.kubevirt.io/addresses: '{"vm-network":["192.168.1.13"]}'
       labels:
-        appname: static-ip-workload
+        appname: kubevirt
         kubevirt.io/domain: vm-static-ip
     spec:
       domain:
@@ -49,7 +48,7 @@ spec:
     - metadata:
         name: vm-static-ip-root-disk-3
         labels:
-          appname: static-ip-workload
+          appname: kubevirt
       spec:
         storage:
           accessModes: [ReadWriteOnce]
