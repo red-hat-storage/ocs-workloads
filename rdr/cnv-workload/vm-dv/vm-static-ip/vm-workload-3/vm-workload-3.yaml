@@ -50,6 +50,7 @@ spec:
         name: vm-static-ip-root-disk-3
         labels:
           appname: kubevirt
+          ramendr.openshift.io/k8s-resource-selector: kubevirt
       spec:
         storage:
           accessModes: [ReadWriteOnce]
