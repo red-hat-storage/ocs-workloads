@@ -5,7 +5,7 @@ metadata:
   namespace: vm-ip-translation-test
   labels:
     appname: kubevirt
-    ramendr.openshift.io/k8s-resource-selector: static-ip-workload
+    ramendr.openshift.io/k8s-resource-selector: kubevirt
 spec:
   runStrategy: Always
   template:
