@@ -2,6 +2,6 @@
 resources:
   - vm-workload-2.yaml
 commonLabels:
-  appname: static-ip-workload
+  appname: kubevirt
 generatorOptions:
   disableNameSuffixHash: true

@@ -35,11 +35,11 @@ spec:
       volumes:
         - name: containerdisk
           persistentVolumeClaim:
-            claimName: vm-static-ip-root-disk
+            claimName: vm-static-ip-root-disk-2
         - name: cloudinitdisk
           cloudInitNoCloud:
             networkDataSecretRef:
-              name: vm-secret-1
+              name: vm-client-network-config
             userData: |-
               #cloud-config
               password: fedora
