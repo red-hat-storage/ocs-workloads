@@ -1,0 +1,7 @@
+---
+resources:
+  - vm-workload.yaml
+commonLabels:
+  appname: kubevirt
+generatorOptions:
+  disableNameSuffixHash: true
