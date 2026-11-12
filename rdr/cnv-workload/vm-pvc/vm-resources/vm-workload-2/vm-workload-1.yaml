@@ -3,6 +3,8 @@ apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   name: vm-workload-2
+  labels:
+    appname: kubevirt
 spec:
   running: true
   template:
