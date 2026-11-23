@@ -1,0 +1,46 @@
+# Lets simple_io.sh / simple_io_integrity_check.sh read the cluster identity
+# (Infrastructure "cluster" and ClusterVersion "version"), so every event and
+# report records which cluster it ran on: primary or DR.
+#
+# Apply ONCE per managed cluster, on primary AND DR:
+#   oc apply -f rdr/busybox/cluster_resources/dr-io-rbac.yaml
+#
+# Keep it out of the app kustomizations. ApplicationSets and Subscriptions
+# remove an app's resources from a cluster on failover, relocate and delete
+# (and "oc delete -k" does the same), which would take this shared,
+# cluster-scoped role away from every other app on that cluster. Ramen does
+# not move cluster-scoped resources to the DR cluster either.
+#
+# Works for any namespace, including ones generated on the fly: the subject is
+# the built-in group of all service accounts. Scope is read-only "get" on two
+# cluster configuration objects, which hold no secrets.
+#
+# Without it the scripts still work and record a "ca-<hash>" cluster ID.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: dr-io-cluster-identity-reader
+  labels: { app.kubernetes.io/part-of: dr-io }
+rules:
+  - apiGroups: ["config.openshift.io"]
+    resources: ["infrastructures"]
+    resourceNames: ["cluster"]
+    verbs: ["get"]
+  - apiGroups: ["config.openshift.io"]
+    resources: ["clusterversions"]
+    resourceNames: ["version"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: dr-io-cluster-identity-reader
+  labels: { app.kubernetes.io/part-of: dr-io }
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dr-io-cluster-identity-reader
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: system:serviceaccounts
