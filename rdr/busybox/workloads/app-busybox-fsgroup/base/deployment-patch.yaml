@@ -1,0 +1,200 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-1
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-2
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-3
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-4
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-5
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-6
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-7
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-8
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-9
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-10
+spec:
+  template:
+    spec:
+      serviceAccountName: busybox-scc-sa
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 2000
+        supplementalGroups: [3000, 4000]
+      containers:
+      - name: busybox
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL

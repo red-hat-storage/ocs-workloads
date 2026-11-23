@@ -1,0 +1,10 @@
+resources:
+- ../../../base
+- serviceaccount.yaml
+
+patches:
+- path: deployment-patch.yaml
+
+commonLabels:
+  scc-testing: "true"
+  scc-level: "privileged"
