@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: simple-io-script
+data:
+  simple_io.sh: |
+    #!/bin/sh
+
+    Cyan='\033[0;36m'
+    NC='\033[0m'
+
+    MOUNT="/mnt/test"
+    HASHFILE="$MOUNT/hashfile"
+    LOGFILE="$MOUNT/script.log"
+
+    APISERVER="https://kubernetes.default.svc"
+    TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    CACERT="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+
+    log() {
+        level=$1
+        shift
+        ts=$(date '+%Y-%m-%dT%H:%M:%S%z')
+        printf "%s [%s] %s\n" "$ts" "$level" "$*" | tee -a "$LOGFILE"
+    }
+
+    is_volsync_syncing() {
+        wget -q --no-check-certificate \
+            --header="Authorization: Bearer $TOKEN" \
+            -O - \
+            "$APISERVER/apis/volsync.backube/v1alpha1/namespaces/$NAMESPACE/replicationsources" \
+            2>/dev/null \
+            | tr -d ' \n\t' \
+            | grep -q '"status":"True"[^}]*"type":"Synchronizing"'
+    }
+
+    wait_for_sync_complete() {
+        local _logged=0
+        while is_volsync_syncing; do
+            if [ "$_logged" -eq 0 ]; then
+                log INFO "VolSync sync in progress, pausing writes..."
+                _logged=1
+            fi
+            sleep 5
+        done
+    }
+
+    cleanup() {
+        log INFO "Received termination signal! Syncing data and exiting..."
+        if [ -n "$SLEEP_PID" ] && kill -0 "$SLEEP_PID" 2>/dev/null; then
+            log INFO "Killing background sleep (pid $SLEEP_PID)"
+            kill "$SLEEP_PID" 2>/dev/null
+        fi
+        sync
+        touch "$MOUNT/trap_$(date +%s)"
+        log INFO "Exiting cleanly"
+        exit 0
+    }
+
+    trap cleanup SIGINT SIGTERM
+
+    hostname=$(hostname -f 2>/dev/null || hostname)
+    node="${NODE_NAME:-unknown}"
+
+    while true; do
+        file="$MOUNT/data_$(date +%s)_${hostname}_${node}"
+        log INFO "Creating file with name: ${file}"
+
+        wait_for_sync_complete
+
+        dd if=/dev/urandom of="$file" bs=4k count=$((RANDOM % 3 + 1)) oflag=direct 2>>"$LOGFILE"
+        dd_status=$?
+        if [ "$dd_status" -ne 0 ]; then
+            log ERROR "dd failed with status $dd_status; removing partial file $file"
+            rm -f "$file"
+            sync
+            sleep 1
+            continue
+        fi
+
+        md5sum "$file" >> "$HASHFILE" 2>>"$LOGFILE" || log WARN "Failed to append hash for $file"
+        sync
+
+        sleep_time=$((RANDOM % 15 + 1))
+        log INFO "Sleeping for $sleep_time seconds..."
+        sleep "$sleep_time" &
+        SLEEP_PID=$!
+        wait "$SLEEP_PID"
+        SLEEP_PID=
+
+        if [ $((RANDOM % 2)) -eq 1 ]; then
+            if md5sum -c --quiet "$HASHFILE"; then
+                log INFO "Integrity check passed"
+            else
+                log WARN "Integrity check found problems (see md5sum output)"
+            fi
+        fi
+    done
