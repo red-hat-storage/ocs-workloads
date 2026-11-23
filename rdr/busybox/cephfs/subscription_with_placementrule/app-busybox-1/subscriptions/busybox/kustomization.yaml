@@ -1,7 +1,0 @@
-namespace: busybox-workloads-cephfs-1
-resources:
-- namespace.yaml
-- placementrule.yaml
-- subscription.yaml
-- drpc.yaml
-- app.yaml
