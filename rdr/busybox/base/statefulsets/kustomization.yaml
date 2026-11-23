@@ -4,6 +4,21 @@ resources:
   - busybox-sfs-3.yaml
   - busybox-sfs-4.yaml
   - busybox-sfs-5.yaml
+patches:
+  # Stable writer identity for simple_io.sh: the pod's "workload" label
+  # (e.g. busybox-1). Pod names of Deployments change on every restart and
+  # failover; this keeps one data directory and one sequence per PVC.
+  - target:
+      kind: StatefulSet
+      labelSelector: workloadpattern=simple_io
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: WRITER_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['workload']
 images:
   - name: quay.io/ocsci/rdr-ocs-workload
     newTag: latest
