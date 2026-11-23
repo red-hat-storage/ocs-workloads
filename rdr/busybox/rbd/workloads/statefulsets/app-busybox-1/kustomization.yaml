@@ -9,3 +9,5 @@ patches:
     - op: replace
       path: /spec/volumeClaimTemplates/0/spec/storageClassName
       value: ocs-storagecluster-ceph-rbd
+
+nameSuffix: -rbd

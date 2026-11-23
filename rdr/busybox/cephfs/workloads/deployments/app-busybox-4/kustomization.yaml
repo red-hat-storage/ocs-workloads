@@ -21,3 +21,4 @@ patches:
       - op: replace
         path: /metadata/labels/appname
         value: busybox_app4_cephfs
+nameSuffix: -cephfs

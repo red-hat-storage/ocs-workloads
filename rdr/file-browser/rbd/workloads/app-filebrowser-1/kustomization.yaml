@@ -1,2 +1,20 @@
 resources:
 - ../../../base
+patches:
+  - target:
+      kind: Deployment
+      name: filebrowser
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: filebrowser-rbd
+      - op: replace
+        path: /spec/template/spec/volumes/0/persistentVolumeClaim/claimName
+        value: filebrowser-pvc-1-rbd
+  - target:
+      kind: PersistentVolumeClaim
+      name: filebrowser-pvc-1
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: filebrowser-pvc-1-rbd

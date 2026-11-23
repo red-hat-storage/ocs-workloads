@@ -12,3 +12,5 @@ patches:
     - op: replace
       path: /spec/volumeClaimTemplates/0/spec/accessModes/0
       value: ReadWriteMany
+
+nameSuffix: -cephfs
